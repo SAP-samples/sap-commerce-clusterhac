@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+--><project>
+<!--    <macrodef name="extension_compile_hac">-->
+<!--        <attribute name="extname" />-->
+<!--        <sequential>-->
+<!--            <delete dir="${bundled.tomcat.home}/work" />-->
+<!--            <if>-->
+<!--                <istrue value="${ext.@{extname}.extension.meta.hac-module}" />-->
+<!--                <then>-->
+<!--                    <if>-->
+<!--                        <available file="${ext.@{extname}.path}/hac/src" type="dir" />-->
+<!--                        <then><echo message="Building hac-module '@{extname}'..." />-->
+<!--                            <callback extname="@{extname}" target="before_compile_hac" />-->
+<!--                            <mkdir dir="${ext.@{extname}.path}/hac/classes" />-->
+
+<!--                            <javacompile destdir="${ext.@{extname}.path}/hac/classes">-->
+<!--                                <additionalclasspath>-->
+<!--                                    <fileset dir="${ext.hac.path}/web/webroot/WEB-INF/lib">-->
+<!--                                        <include name="*.jar" />-->
+<!--                                    </fileset>-->
+<!--                                    <pathelement path="${ext.hac.path}/web/webroot/WEB-INF/classes" />-->
+<!--                                    <pathelement path="${ext.@{extname}.classpath}"/>-->
+<!--                                </additionalclasspath>-->
+<!--                                <source>-->
+<!--                                    <dirset dir="${ext.@{extname}.path}/hac">-->
+<!--                                        <include name="src" />-->
+<!--                                        <include name="gensrc" />-->
+<!--                                        <include name="testsrc" />-->
+<!--                                    </dirset>-->
+<!--                                </source>-->
+<!--                            </javacompile>-->
+
+<!--                            <if>-->
+<!--                                <available file="${ext.@{extname}.path}/hac/testsrc" />-->
+<!--                                <then>-->
+<!--                                    <mkdir dir="${ext.@{extname}.path}/hac/testclasses" />-->
+
+<!--                                    <javacompile destdir="${ext.@{extname}.path}/hac/testclasses">-->
+<!--                                        <source>-->
+<!--                                            <dirset dir="${ext.@{extname}.path}/hac">-->
+<!--                                                <include name="testsrc" />-->
+<!--                                            </dirset>-->
+<!--                                        </source>-->
+<!--                                        <additionalclasspath>-->
+<!--                                            <pathelement path="${ext.@{extname}.path}/hac/classes" />-->
+<!--                                            <fileset dir="${ext.hac.path}/web/webroot/WEB-INF/lib">-->
+<!--                                                <include name="*.jar" />-->
+<!--                                            </fileset>-->
+<!--                                            <pathelement path="${ext.hac.path}/web/webroot/WEB-INF/classes" />-->
+<!--                                            <fileset dir="${ext.@{extname}.path}">-->
+<!--                                                <include name="bin/*.jar" />-->
+<!--                                            </fileset>-->
+<!--                                            <pathelement path="${ext.@{extname}.classpath}"/>-->
+<!--                                        </additionalclasspath>-->
+<!--                                    </javacompile>-->
+<!--                                </then>-->
+<!--                            </if>-->
+
+<!--                            <mkdir dir="${ext.@{extname}.path}/hac/classes/META-INF/resources/WEB-INF" />-->
+<!--                            <copy todir="${ext.@{extname}.path}/hac/classes/META-INF/resources/WEB-INF" failonerror="false">-->
+<!--                                <fileset dir="${ext.@{extname}.path}/hac/resources/">-->
+<!--                                    <exclude name="static/**"/>-->
+<!--                                    <exclude name="messages*.properties"/>-->
+<!--                                </fileset>-->
+<!--                            </copy>-->
+
+<!--                            <copy todir="${ext.@{extname}.path}/hac/classes/META-INF/resources/WEB-INF" failonerror="false">-->
+<!--                                <fileset dir="${ext.@{extname}.path}/hac/resources/">-->
+<!--                                    <include name="messages*.properties"/>-->
+<!--                                </fileset>-->
+<!--                                <regexpmapper from="^messages(.*)\.properties$$" to="messages-@{extname}\1.properties"/>-->
+<!--                            </copy>-->
+
+<!--                            <copy todir="${ext.@{extname}.path}/hac/classes/META-INF/resources" failonerror="false">-->
+<!--                                <fileset dir="${ext.@{extname}.path}/hac/resources/" includes="static/**"/>-->
+<!--                            </copy>-->
+
+<!--                            <jar destfile="${platformhome}/ext/hac/web/webroot/WEB-INF/lib/@{extname}_hac.jar" basedir="${ext.@{extname}.path}/hac/classes" />-->
+
+<!--                            <callback extname="@{extname}" target="after_compile_hac" />-->
+<!--                        </then>-->
+<!--                    </if>-->
+<!--                </then>-->
+<!--            </if>-->
+<!--        </sequential>-->
+<!--    </macrodef>-->
+
+
+    <macrodef name="clusterhac_before_ear">
+        		
+        <sequential>
+            			
+            <!-- you can do anything before the EAR file is being packed -->
+            		
+        </sequential>
+        	
+    </macrodef>
+    
+</project>

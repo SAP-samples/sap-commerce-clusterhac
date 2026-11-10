@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<!--
+	The hybris platform provides one single Spring application context for beans located at the jalo layer.
+	Each extension can add beans to this context by specifying them at this configuration file.
+	 
+	You can use and/or redefine beans defined at configuration files of other extensions as well as
+	adding new one.
+		
+	If you want to locate this file at a different location or want to use several files for better,
+	structuring, please use the '<yourextension>.application-context' property at your project.properties file.
+	There you can specify a comma separated list of files where first is tried to find a file per classpath and
+	then per file system.
+
+	
+	If you want to configure beans for your web module please have a look at
+	your web/webroot/WEB-INF/<extname>-web-spring.xml.
+	-->
+
+
+	<bean id="clusterhacHacTabsConfig" class="de.hybris.platform.hac.custom.JsonHacConfiguration">
+		<property name="resource" value="classpath:clusterhac-tab-config.json"/>
+	</bean>
+
+	<bean id="clusterThreadDumpDao" class="com.sap.commerce.clusterhac.dao.impl.DefaultClusterThreadDumpDao">
+		<constructor-arg ref="flexibleSearchService"/>
+	</bean>
+
+	<bean id="clusterThreadDumpService" class="com.sap.commerce.clusterhac.service.impl.DefaultClusterThreadDumpService">
+		<constructor-arg ref="clusterThreadDumpDao"/>
+		<constructor-arg ref="modelService"/>
+		<constructor-arg ref="mediaService"/>
+	</bean>
+
+	<alias name="defaultScriptExecutorService" alias="scriptExecutorService" />
+	<bean id="defaultScriptExecutorService" class="com.sap.commerce.clusterhac.service.impl.DefaultScriptExecutorService">
+		<constructor-arg ref="scriptingLanguagesExecutor"/>
+		<constructor-arg ref="clusterService"/>
+	</bean>
+
+	<bean id="clusterScriptExecutor" class="com.sap.commerce.clusterhac.service.ClusterScriptExecutorService">
+		<constructor-arg ref="eventService"/>
+		<constructor-arg>
+			<bean class="com.sap.commerce.clusterhac.service.ClusterScriptExecutorService" factory-method="createCacheInstance"/>
+		</constructor-arg>
+	</bean>
+
+	<bean id="scriptExecutorEventListener"
+		class="com.sap.commerce.clusterhac.event.listeners.ScriptExecutorEventListener"
+		parent="abstractEventListener">
+		<constructor-arg ref="clusterService"/>
+		<constructor-arg ref="eventService"/>
+		<constructor-arg ref="scriptExecutorService"/>
+		<constructor-arg ref="scriptingLanguagesExecutor"/>
+	</bean>
+
+	<bean id="scriptResultEventListener"
+		class="com.sap.commerce.clusterhac.event.listeners.ScriptResultEventListener"
+		parent="abstractEventListener">
+		<constructor-arg ref="clusterScriptExecutor"/>
+	</bean>
+
+	<bean id="clusterCacheEventListener"
+		class="com.sap.commerce.clusterhac.event.listeners.ClusterCacheEventListener"
+		parent="abstractEventListener">
+		<constructor-arg ref="clusterService"/>
+		<constructor-arg ref="eventService"/>
+		<constructor-arg ref="hacCacheFacade" />
+	</bean>
+
+	<bean id="clusterCacheExecutorService" class="com.sap.commerce.clusterhac.service.ClusterCacheExecutorService">
+		<constructor-arg ref="eventService"/>
+		<constructor-arg>
+			<bean class="com.sap.commerce.clusterhac.service.ClusterCacheExecutorService" factory-method="createCacheInstance"/>
+		</constructor-arg>
+	</bean>
+
+	<bean id="clusterViewExecutorService" class="com.sap.commerce.clusterhac.service.ClusterViewExecutorService">
+		<constructor-arg ref="eventService"/>
+		<constructor-arg>
+			<bean class="com.sap.commerce.clusterhac.service.ClusterViewExecutorService" factory-method="createCacheInstance"/>
+		</constructor-arg>
+	</bean>
+
+	<bean id="clusterJdbcLogInfoExecutorService" class="com.sap.commerce.clusterhac.service.ClusterJdbcLogInfoExecutorService">
+		<constructor-arg ref="eventService"/>
+		<constructor-arg>
+			<bean class="com.sap.commerce.clusterhac.service.ClusterJdbcLogInfoExecutorService" factory-method="createCacheInstance"/>
+		</constructor-arg>
+	</bean>
+
+	<bean id="clusterThreadDumpInfoExecutorService" class="com.sap.commerce.clusterhac.service.ClusterThreadDumpInfoExecutorService">
+		<constructor-arg ref="eventService"/>
+		<constructor-arg>
+			<bean class="com.sap.commerce.clusterhac.service.ClusterThreadDumpInfoExecutorService" factory-method="createCacheInstance"/>
+		</constructor-arg>
+	</bean>
+
+	<bean id="clusterViewEventListener"
+		class="com.sap.commerce.clusterhac.event.listeners.ClusterViewEventListener"
+		parent="abstractEventListener">
+		<constructor-arg ref="clusterService"/>
+		<constructor-arg ref="eventService"/>
+		<constructor-arg ref="clusterScriptExecutor"/>
+		<constructor-arg ref="scriptExecutorService"/>
+	</bean>
+
+	<bean id="clusterViewResultEventListener"
+		class="com.sap.commerce.clusterhac.event.listeners.ClusterViewResultEventListener"
+		parent="abstractEventListener">
+		<constructor-arg ref="clusterViewExecutorService"/>
+	</bean>
+
+	<bean id="clusterCacheResultEventListener"
+		class="com.sap.commerce.clusterhac.event.listeners.ClusterCacheResultEventListener"
+		parent="abstractEventListener">
+		<constructor-arg ref="clusterCacheExecutorService"/>
+	</bean>
+
+	<bean id="clusterJdbcLogInfoEventListener"
+		class="com.sap.commerce.clusterhac.event.listeners.ClusterJdbcLogInfoEventListener"
+		parent="abstractEventListener">
+		<constructor-arg ref="clusterService"/>
+		<constructor-arg ref="eventService"/>
+		<constructor-arg ref="hacDatabaseFacade" />
+	</bean>
+
+	<bean id="clusterJdbcLogInfoResultEventListener"
+		class="com.sap.commerce.clusterhac.event.listeners.ClusterJdbcLogInfoResultEventListener"
+		parent="abstractEventListener">
+		<constructor-arg ref="clusterJdbcLogInfoExecutorService"/>
+	</bean>
+
+	<bean id="clusterThreadDumpInfoResultEventListener"
+		class="com.sap.commerce.clusterhac.event.listeners.ClusterThreadDumpInfoResultEventListener"
+		parent="abstractEventListener">
+		<constructor-arg ref="clusterThreadDumpInfoExecutorService"/>
+	</bean>
+
+	<bean id="clusterThreadDumpInfoEventListener"
+		class="com.sap.commerce.clusterhac.event.listeners.ClusterThreadDumpInfoEventListener"
+		parent="abstractEventListener">
+		<constructor-arg ref="clusterService"/>
+		<constructor-arg ref="eventService"/>
+		<constructor-arg ref="threadDumpCollector" />
+	</bean>
+
+	<!-- Heap Dump: streams a JVM heap dump out of a selected pod to Azure Blob Storage. -->
+	<bean id="heapDumpService" class="com.sap.commerce.clusterhac.service.impl.DefaultHeapDumpService"/>
+
+	<bean id="clusterHeapDumpInfoExecutorService" class="com.sap.commerce.clusterhac.service.ClusterHeapDumpInfoExecutorService">
+		<constructor-arg ref="eventService"/>
+		<constructor-arg>
+			<bean class="com.sap.commerce.clusterhac.service.ClusterHeapDumpInfoExecutorService" factory-method="createCacheInstance"/>
+		</constructor-arg>
+	</bean>
+
+	<bean id="clusterHeapDumpInfoEventListener"
+		class="com.sap.commerce.clusterhac.event.listeners.ClusterHeapDumpInfoEventListener"
+		parent="abstractEventListener">
+		<constructor-arg ref="clusterService"/>
+		<constructor-arg ref="eventService"/>
+		<constructor-arg ref="heapDumpService"/>
+	</bean>
+
+	<bean id="clusterHeapDumpInfoResultEventListener"
+		class="com.sap.commerce.clusterhac.event.listeners.ClusterHeapDumpInfoResultEventListener"
+		parent="abstractEventListener">
+		<constructor-arg ref="clusterHeapDumpInfoExecutorService"/>
+	</bean>
+
+</beans>

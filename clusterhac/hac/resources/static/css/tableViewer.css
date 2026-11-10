@@ -1,0 +1,29 @@
+tbody tr.even td.status-ERROR,
+tbody tr.odd td.status-ERROR {
+    background-color: red !important;
+}
+
+tbody tr.even td.status-WARN,
+tbody tr.odd td.status-WARN {
+    background-color: yellow !important;
+}
+
+tbody tr.even td.status-OK,
+tbody tr.odd td.status-OK {
+    background-color: green !important;
+}
+
+div#tabs div {
+    overflow: auto;
+}
+
+#content div.toolbar {
+    margin-left: 15px;
+    padding-left: 15px;
+    float: left;
+    border-left: 2px dashed black;
+}
+
+table.tableViewer {
+    width: 100% !important;
+}

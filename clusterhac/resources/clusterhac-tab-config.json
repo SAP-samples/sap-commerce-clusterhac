@@ -1,0 +1,43 @@
+[
+  {
+    "basePath": "/cluster",
+    "mainTabLabel": "Cluster",
+    "subTabs": [
+      {
+        "path": "/overview",
+        "label": "Overview",
+        "skipPrefix": false
+      },
+      {
+        "path": "/scripting",
+        "label": "Cluster Scripting",
+        "skipPrefix": false
+      },
+      {
+        "path": "/thread-dump",
+        "label": "Cluster Thread Dump",
+        "skipPrefix": false
+      },
+      {
+        "path": "/heap-dump",
+        "label": "Cluster Heap Dump",
+        "skipPrefix": false
+      },
+      {
+        "path": "/monitoring",
+        "label": "Cache Monitoring",
+        "skipPrefix": false
+      },
+      {
+        "path": "/config",
+        "label": "Cluster Config",
+        "skipPrefix": false
+      },
+      {
+        "path": "/database",
+        "label": "JDBC Log",
+        "skipPrefix": false
+      }
+    ]
+  }
+]

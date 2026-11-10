@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<!--
+	ATTENTION: This is just an example file. You have to edit it according to your needs.
+-->
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="beans.xsd">
+
+
+	<!-- Azure cluster HAC -->
+	<bean class="com.sap.commerce.clusterhac.data.ScriptEvaluationResult">
+		<property name="node" type="int"/>
+		<property name="clusterGroup" type="java.util.Collection&lt;String&gt;" />
+		<property name="clusterGroupAndHostName" type="java.lang.String" />
+		<property name="executionResult" type="java.lang.String" />
+		<property name="outputText" type="java.lang.String" />
+		<property name="stacktraceText" type="java.lang.String" />
+	</bean>
+
+	<!-- Azure cluster HAC -->
+	<bean class="com.sap.commerce.clusterhac.data.ClusterDetailResult">
+		<property name="nodeID" type="int"/>
+		<property name="clusterGroupAndHostName" type="java.lang.String" />
+		<property name="hostName" type="java.lang.String" />
+		<property name="clusterIP" type="java.lang.String" />
+		<property name="clusterGroup" type="java.util.Collection&lt;String&gt;" />
+		<property name="stacktraceText" type="java.lang.String" />
+		<property name="kibanaEndpoint" type="java.lang.String" />
+		<property name="heapUsedMb" type="long" />
+		<property name="heapMaxMb" type="long" />
+		<property name="nonHeapMb" type="long" />
+		<property name="uptime" type="java.lang.String" />
+		<property name="gcInfo" type="java.lang.String" />
+		<property name="threads" type="java.lang.String" />
+		<property name="cpu" type="java.lang.String" />
+		<property name="dbPool" type="java.lang.String" />
+		<!-- Raw numeric health signals for the Overview "nodes needing attention" list -->
+		<property name="cpuPct" type="int" />
+		<property name="poolActive" type="int" />
+		<property name="poolMax" type="int" />
+		<property name="lastGcMs" type="long" />
+	</bean>
+
+	<bean class="com.sap.commerce.clusterhac.data.ClusterJdbcLogInfoResult">
+		<property name="nodeID" type="int"/>
+		<property name="clusterGroup" type="java.util.Collection&lt;String&gt;" />
+		<property name="logEnabled" type="boolean" />
+		<property name="tracesEnabled" type="boolean" />
+		<property name="paramsEnabled" type="boolean" />
+		<property name="logFileSize" type="Integer" />
+		<property name="logFilePath" type="java.lang.String" />
+	</bean>
+
+	<bean class="com.sap.commerce.clusterhac.data.ClusterThreadDumpInfoResult">
+		<property name="nodeID" type="int"/>
+		<property name="clusterGroup" type="java.util.Collection&lt;String&gt;" />
+		<property name="dumpProcessing" type="boolean" />
+	</bean>
+
+	<bean class="com.sap.commerce.clusterhac.data.ClusterHeapDumpInfoResult">
+		<property name="nodeID" type="int"/>
+		<property name="clusterGroup" type="java.util.Collection&lt;String&gt;" />
+		<!-- IDLE | IN_PROGRESS | DONE | FAILED -->
+		<property name="status" type="java.lang.String" />
+		<property name="blobName" type="java.lang.String" />
+		<property name="blobUrl" type="java.lang.String" />
+		<property name="bytesStreamed" type="long" />
+		<property name="startedAt" type="java.lang.String" />
+		<property name="finishedAt" type="java.lang.String" />
+		<property name="message" type="java.lang.String" />
+	</bean>
+
+</beans>

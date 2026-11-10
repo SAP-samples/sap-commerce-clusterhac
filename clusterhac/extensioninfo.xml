@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+--><extensioninfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="extensioninfo.xsd">
+           
+    
+    <extension abstractclassprefix="Generated" classprefix="Yhacext" jaloLogicFree="true" managername="YhacextManager" managersuperclass="de.hybris.platform.jalo.extension.Extension" name="clusterhac" usemaven="false">
+                      
+
+
+<!--        <requires-extension name="cmsfacades" />-->
+        <!-- Heap Dump tab streams dumps to Azure Blob via com.azure.storage.blob.*, shipped by azurecloud. -->
+        <requires-extension name="azurecloud"/>
+        <coremodule generated="true" manager="clusterhac.jalo.YhacextManager" packageroot="clusterhac"/>
+        
+        <meta key="hac-module" value="true"/>
+                   
+    
+    </extension>
+              
+
+
+</extensioninfo>

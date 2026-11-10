@@ -1,0 +1,10 @@
+#cluser-node-groups {
+  margin-left: 15px;
+  padding-left: 15px;
+  float: left;
+  border-left: 2px dashed black;
+}
+button:disabled {
+  background: #F5F5F5;
+  color : #C3C3C3;
+}

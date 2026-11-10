@@ -1,0 +1,165 @@
+/*
+ * clusterhac.css — MINIMAL, non-theming helpers for the ClusterHAC pages.
+ *
+ * IMPORTANT: We deliberately do NOT re-theme HAC here. An earlier scoped "Fiori" colour layer
+ * fought HAC's base stylesheet and produced invisible text (light-on-light) repeatedly, so it
+ * was removed. This file now contains ONLY structural/layout rules and semantic KPI colours
+ * that HAC does not provide — no overrides of HAC's text/background/surface colours. Pages
+ * inherit HAC's native theme, which stays readable and consistent with the rest of the console.
+ * Everything is scoped under .chac so it cannot leak into HAC chrome.
+ */
+
+/* --- Sub-tab show/hide (structure only, no colours) --- */
+.chac .cache-subtabs { list-style:none; margin:0 0 14px 0; padding:0; border-bottom:1px solid #d0d0d0; }
+.chac .cache-subtabs li { display:inline-block; margin:0 4px -1px 0; }
+.chac .cache-subtabs a { display:inline-block; padding:7px 16px; text-decoration:none;
+	border:1px solid transparent; border-bottom:none; border-radius:4px 4px 0 0; }
+.chac .cache-subtabs a:hover { background:rgba(0,0,0,0.04); }
+.chac .cache-subtabs a.active { font-weight:bold; background:#fff; border-color:#d0d0d0;
+	border-bottom:1px solid #fff; }
+.chac .cache-pane { display:none; }
+.chac .cache-pane.active { display:block; }
+
+/* --- Layout: cards use HAC's colours; we add structure (border/radius/shadow/spacing) --- */
+.chac .cache-dash-tiles { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:18px; }
+.chac .cache-tile { flex:1 1 160px; padding:12px 16px; border:1px solid #d5d5d5; border-radius:6px;
+	background:rgba(255,255,255,0.5); box-shadow:0 1px 2px rgba(0,0,0,0.05); }
+.chac .cache-tile .label { font-size:0.75em; text-transform:uppercase; letter-spacing:0.04em; opacity:0.7; }
+.chac .cache-tile .value { font-size:1.7em; font-weight:bold; margin-top:5px; }
+.chac .cache-bar { height:8px; margin-top:8px; background:rgba(0,0,0,0.08); border-radius:99px; overflow:hidden; }
+.chac .cache-bar > span { display:block; height:100%; border-radius:99px; transition:width .3s; }
+
+.chac .region-kpis { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:14px; }
+.chac .region-kpi { padding:9px 13px; min-width:112px; border:1px solid #d5d5d5; border-radius:6px;
+	background:rgba(255,255,255,0.5); box-shadow:0 1px 2px rgba(0,0,0,0.05); }
+.chac .region-kpi .k-label { display:block; font-size:0.72em; text-transform:uppercase; letter-spacing:0.03em; opacity:0.7; }
+.chac .region-kpi .k-val { display:block; font-size:1.2em; font-weight:bold; margin-top:3px; }
+.chac .region-body { padding:6px 2px 14px; }
+.chac .region-stats { margin-bottom:12px; }
+.chac .region-stats th { padding:4px 16px 4px 0; text-align:left; opacity:0.7; font-weight:normal; }
+.chac .region-stats td { padding:2px 16px 2px 0; font-weight:bold; }
+
+.chac .cache-worst { width:100%; border-collapse:collapse; }
+.chac .cache-worst th, .chac .cache-worst td { padding:5px 8px; text-align:left; }
+.chac .cache-worst th { opacity:0.7; font-weight:600; border-bottom:2px solid rgba(0,0,0,0.12); }
+.chac .cache-worst tbody tr:hover { background:rgba(0,0,0,0.03); }
+
+/* --- Overview tool tiles (layout + hover affordance; HAC colours) --- */
+.chac .ov-tools { display:flex; flex-wrap:wrap; gap:14px; margin:10px 0 22px; }
+.chac .ov-tool { flex:1 1 180px; display:block; text-decoration:none; padding:13px 16px;
+	border:1px solid #d5d5d5; border-radius:6px; background:rgba(255,255,255,0.5);
+	box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:box-shadow .12s, transform .06s; }
+.chac .ov-tool:hover { box-shadow:0 2px 8px rgba(0,0,0,0.12); transform:translateY(-1px); }
+.chac .ov-tool .t-name { display:block; font-weight:700; }
+.chac .ov-tool .t-desc { display:block; font-size:0.85em; margin-top:4px; opacity:0.75; }
+
+/* --- Node cards (Overview node strip: one card per node, actions in the header) --- */
+.chac .node-cards { display:flex; flex-direction:column; gap:12px; margin-top:10px; }
+.chac .node-card { border:1px solid #d5d5d5; border-radius:6px; background:rgba(255,255,255,0.5);
+	box-shadow:0 1px 2px rgba(0,0,0,0.05); }
+.chac .node-card-head { display:flex; align-items:center; justify-content:space-between;
+	flex-wrap:wrap; gap:8px; padding:10px 14px; border-bottom:1px solid rgba(0,0,0,0.08);
+	background:rgba(0,0,0,0.03); border-radius:6px 6px 0 0; }
+.chac .node-badge { display:inline-block; padding:1px 8px; border-radius:10px; font-weight:bold;
+	font-size:0.85em; background:rgba(0,0,0,0.08); }
+.chac .node-actions { display:flex; gap:6px; }
+.chac .node-action { display:inline-block; padding:3px 12px; border:1px solid #7a90b0;
+	border-radius:4px; text-decoration:none; font-size:0.85em; font-weight:600;
+	background:#eef2f8; }
+.chac .node-action:hover { background:#dde6f3; border-color:#5a76a0; }
+.chac .node-metrics { display:flex; flex-wrap:wrap; gap:18px; padding:12px 14px; }
+.chac .node-metric { display:flex; flex-direction:column; min-width:90px; }
+.chac .node-metric .nm-label { font-size:0.7em; text-transform:uppercase; letter-spacing:0.03em; opacity:0.65; }
+.chac .node-metric .nm-val { font-size:1.05em; font-weight:bold; margin-top:2px; }
+
+/* --- Semantic KPI badges: value-driven colour is set inline by JS (green/amber/red). --- */
+.chac .cache-kpi { display:inline-block; padding:1px 7px; border-radius:10px; font-weight:bold; font-size:0.92em; }
+.chac .cache-kpi-neutral { background:#eee; color:#666; }
+
+/* --- Copy button (query cache). Explicit colours: it's a small utility button on a known
+ *     light row; HAC's button text colour (for its dark-blue buttons) would render invisible. --- */
+.chac .copy-btn { display:inline-block; padding:2px 10px; margin-left:8px; font-size:0.8em;
+	line-height:1.4; cursor:pointer; border:1px solid #7a90b0; border-radius:4px;
+	background:#eef2f8 !important; color:#2f4a73 !important; font-weight:600; text-transform:none; }
+.chac .copy-btn:hover { background:#dde6f3 !important; border-color:#5a76a0; }
+.chac .copy-btn.copied { background:#dff0d8 !important; color:#3c763d !important; border-color:#b6dbb6; }
+
+/* --- Clear-cache guard (destructive: red accent only on the toggle label) --- */
+.chac .clear-cache-guard { display:flex; align-items:center; gap:12px; margin:10px 0 4px;
+	padding-top:10px; border-top:1px solid rgba(0,0,0,0.1); }
+.chac .clear-cache-toggle { color:#a71d1d; font-weight:bold; }
+.chac .clear-cache-note { font-size:0.85em; opacity:0.8; }
+/* Disabled Clear-cache button must LOOK disabled (destructive action guard). HAC renders a
+ * disabled <button> the same as an enabled one, which is misleading here. Applies to both the
+ * node-wide clear-all (#resetCache) and the per-region clear buttons (.clearRegionBtn). */
+.chac #resetCache[disabled], .chac .clearRegionBtn[disabled] { opacity:0.45; cursor:not-allowed; filter:grayscale(60%); }
+
+/* --- Scripting tab refinements --- */
+.chac .script-target { margin-bottom:12px; }
+.chac .script-target-label { display:block; font-weight:600; margin-bottom:4px; }
+.chac .script-target select { min-width:220px; min-height:88px; }
+.chac .script-usage { margin:8px 0 0; }
+.chac .script-scope-chip { display:inline-block; margin-left:12px; padding:2px 10px;
+	border-radius:12px; font-size:0.85em; font-weight:600; background:#e6eef7; border:1px solid #b9cbe4;
+	vertical-align:top; }
+.chac .script-scope-chip.scope-all { background:#fde7e7; border-color:#e6b8b8; color:#a71d1d; }
+.chac .script-warning { margin:0 0 12px; padding:8px 12px; border-radius:4px;
+	background:#fdf3e0; border-left:4px solid #e9730c; }
+.chac .script-warning code { background:rgba(0,0,0,0.06); padding:0 3px; border-radius:2px; }
+.chac .script-actionbar { display:flex; align-items:center; gap:14px; margin-top:10px;
+	padding-top:10px; border-top:1px solid rgba(0,0,0,0.1); }
+.chac .script-actionbar #modeWarningMsg { flex:1; font-size:0.85em; }
+
+/* --- Scripting: pod sub-selection --- */
+.chac .script-pods { margin-top:10px; }
+.chac .pod-toolbar { display:flex; align-items:center; gap:12px; margin:8px 0; }
+.chac .pod-toolbar #podSearch { padding:4px 8px; border:1px solid #bbb; border-radius:4px; min-width:240px; }
+.chac .pod-list { margin-top:8px; display:flex; flex-wrap:wrap; gap:14px; }
+.chac .pod-group { border:1px solid #d5d5d5; border-radius:6px; padding:8px 12px; min-width:200px;
+	max-height:260px; overflow:auto; background:rgba(255,255,255,0.5); }
+.chac .pod-group-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+	margin-bottom:4px; border-bottom:1px solid rgba(0,0,0,0.08); padding-bottom:3px; }
+.chac .pod-group-name { font-weight:700; }
+.chac .pod-group-all { font-size:0.8em; }
+.chac .pod-item { display:block; padding:2px 0; }
+
+/* --- Config drift / consistency banners --- */
+.chac .config-drift, .chac .config-consistent { margin:0 0 12px; padding:8px 12px; border-radius:4px; }
+.chac .config-drift { background:#fdf3e0; border-left:4px solid #e9730c; }
+.chac .config-consistent { background:#eaf5ea; border-left:4px solid #2e7d32; }
+.chac .config-drift ul { margin:6px 0 0 18px; }
+.chac .config-drift code, .chac .config-consistent code { background:rgba(0,0,0,0.06); padding:0 3px; border-radius:2px; }
+
+/* --- Top-objects view tabs (query cache: By query / By table) — reuse .cache-subtabs look --- */
+.chac .topObjectsTabs { margin-top:4px; }
+.chac .type-flag { display:inline-block; padding:1px 7px; border-radius:10px; font-size:0.78em;
+	font-weight:600; margin-right:4px; }
+.chac .flag-ratio { background:#fdf3e0; color:#9a6a00; }
+.chac .flag-churn { background:#fbe4e4; color:#a71d1d; }
+
+/* --- Overview "nodes needing attention" reason badges (amber tint; structure only) --- */
+.chac .node-attention { display:inline-block; padding:1px 8px; margin:1px 4px 1px 0; border-radius:10px;
+	font-size:0.8em; font-weight:600; background:#fdf3e0; color:#9a6a00; border:1px solid #ecd9b0; }
+
+/* --- Thread-dump analysis layout (HAC's content CSS forces tight line-heights on <p>/<h*>,
+ *     which made the note + empty-message overlap; restore normal block flow + spacing).
+ *     #td-analysis itself carries .chac, so target it directly (not as a descendant). --- */
+#td-analysis.chac h3, .chac #td-analysis h3 { margin:16px 0 4px; line-height:1.3; }
+#td-analysis.chac h4, .chac #td-analysis h4 { margin:16px 0 4px; line-height:1.3; }
+#td-analysis.chac p.td-note, .chac #td-analysis p.td-note { display:block; margin:0 0 10px; line-height:1.4; }
+#td-analysis.chac table, .chac #td-analysis table { margin:0 0 10px; }
+
+/* --- Findings ("answers" layer) — shared by thread-dump (#td-analysis) and cache (#dash-findings) --- */
+.chac .chac-finding, #td-analysis .td-finding { margin:6px 0; padding:8px 12px; border-radius:4px; border-left:4px solid #999; line-height:1.4; }
+.chac .chac-finding.chac-red, #td-analysis .td-finding.td-red { background:#fbe4e4; border-left-color:#a71d1d; }
+.chac .chac-finding.chac-amber, #td-analysis .td-finding.td-amber { background:#fdf3e0; border-left-color:#e9730c; }
+.chac .chac-finding.chac-info, #td-analysis .td-finding.td-info { background:#eef2f8; border-left-color:#7a90b0; }
+.chac .chac-finding-detail, #td-analysis .td-finding-detail { font-size:0.9em; margin-top:3px; opacity:0.9; }
+#td-analysis .td-deadlock { background:#2b2b2b; color:#f0f0f0; padding:10px; border-radius:4px;
+	font-size:0.8em; overflow:auto; white-space:pre-wrap; }
+
+/* Pod/node badge next to a page title on pod-specific pages (Cache, Thread dump drilled in
+   from the Overview node strip) — makes it obvious which node you are looking at. */
+.chac-pod-badge { display:inline-block; margin-left:8px; padding:2px 10px; font-size:0.5em;
+	vertical-align:middle; background:#0a6ed1; color:#fff; border-radius:12px; font-weight:600;
+	letter-spacing:0.02em; }
