@@ -11,13 +11,31 @@ SPDX-FileCopyrightText = "2026 SAP SE or an SAP affiliate company and sap-commer
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
-path = "<THIRD-PARTY-FILE-OR-FOLDER-LIST>"
-precedence = "aggregate"
-SPDX-FileCopyrightText = "<COPYRIGHT-OF-THIRD-PARTY-CODE>"
-SPDX-License-Identifier = "<LICENSE-OF-THIRD-PARTY-CODE>"
+path = [
+  "clusterhac/hac/resources/static/css/custom-theme/jquery-ui.1.12.1.css",
+  "clusterhac/hac/resources/static/css/custom-theme/images/**",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "jQuery Foundation and other contributors"
+SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = "<ANOTHER-THIRD-PARTY-FILE-OR-FOLDER-LIST>"
-precedence = "aggregate"
-SPDX-FileCopyrightText = "<COPYRIGHT-OF-ANOTHER-THIRD-PARTY-CODE>"
-SPDX-License-Identifier = "<LICENSE-OF-ANOTHER- THIRD-PARTY-CODE>"
+path = [
+  "clusterhac/hac/resources/static/js/jquery-ui-timepicker-addon.js",
+  "clusterhac/hac/resources/static/css/jquery-ui-timepicker-addon.css",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2016 Trent Richardson"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = [
+  "clusterhac/hac/resources/static/js/cluster/jquery.dataTables.min.js",
+  "clusterhac/hac/resources/static/js/cluster/jquery.dataTables.new.min.js",
+  "clusterhac/hac/resources/static/js/dataTables.buttons.min.js",
+  "clusterhac/hac/resources/static/css/buttons.dataTables.min.css",
+  "clusterhac/hac/resources/static/css/table.css",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "SpryMedia Ltd"
+SPDX-License-Identifier = "MIT"
