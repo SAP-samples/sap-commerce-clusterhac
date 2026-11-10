@@ -19,6 +19,11 @@ on:
   schedule:
     - cron: '19 11 * * 4'
 
+# Set the default token permissions for all jobs to read-only.
+# The analyze job below grants the additional scopes CodeQL requires.
+permissions:
+  contents: read
+
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
