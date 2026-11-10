@@ -263,9 +263,13 @@ No known issues.
 
 For additional support, [ask a question in SAP Community](https://answers.sap.com/questions/ask.html).
 
+## Code of Conduct
+
+All members of the project community must abide by the [SAP Open Source Code of Conduct](https://github.com/SAP-samples/.github/blob/main/CODE_OF_CONDUCT.md). Only by respecting each other can we develop a productive, collaborative community. Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting a project maintainer or [ospo@sap.com](mailto:ospo@sap.com).
+
 ## Contributing
 
-If you wish to contribute code, offer fixes or improvements, please send a pull request. Due to legal reasons, contributors will be asked to accept a DCO when they create the first pull request to this project. This happens in an automated fashion during the submission process. SAP uses [the standard DCO text of the Linux Foundation](https://developercertificate.org/).
+If you wish to contribute code, offer fixes or improvements, please send a pull request. Due to legal reasons, contributors will be asked to accept a DCO when they create the first pull request to this project. This happens in an automated fashion during the submission process. SAP uses [the standard DCO text of the Linux Foundation](https://developercertificate.org/). See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## Disclaimer
 
