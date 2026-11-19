@@ -70,7 +70,7 @@
 
                     <button id="start-button" class="td-btn-left" data-start-url="${startUrl}" data-stop-url="${stopUrl}" disabled>Start Thread Dump</button>
                     <button id="save-media-button" class="td-btn-left" data-url="${saveMediaUrl}">Save Thread Dump</button>
-                    <button id="clean-up-media-button" class="td-btn-right" data-url="${cleanUpMediaUrl}">Clean up thread Dump</button>
+                    <button id="clean-up-media-button" class="td-btn-right" data-url="${cleanUpMediaUrl}">Clean up Thread Dump</button>
                     <hr>
                     <div id="accordion"
                          data-refreshThreadDumpInfoUrl="<c:url value="/cluster/thread-dump/dumpinfos"/>"

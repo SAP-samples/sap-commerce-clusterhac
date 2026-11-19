@@ -1,7 +1,6 @@
 var threadDumpEnabled, threadDumpUpdateIntervalId;
 var nodeGroupValues = [];
 var selectedNodeIds = [];
-var token;
 
 var REFRESH_INTERVAL_MS = 10000;
 
@@ -10,8 +9,6 @@ function csrfToken() {
 }
 
 $(document).ready(function() {
-    token = csrfToken();
-
     refreshClusterThreadDumpInfo();
 
     // Pod sub-selection (shared PodPicker). When on, targeting is by node id, not group.
@@ -63,7 +60,7 @@ $(document).ready(function() {
             {
                 "data": "url",
                 "render": function(data) {
-                    return '<a href="' + escapeHtml(data) + '">Download</a>'
+                    return '<a href="' + safeUrl(data) + '">Download</a>'
                 }
             },
             {
@@ -140,7 +137,7 @@ $(document).ready(function() {
             data: saveData,
             headers: {
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN': token
+                'X-CSRF-TOKEN': csrfToken()
             },
             success: function(data) {
                 // Re-enable Start once the save completed, if a target is still selected. Handle
@@ -167,7 +164,7 @@ $(document).ready(function() {
             url: $('#clean-up-media-button').attr('data-url'),
             headers: {
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN': token
+                'X-CSRF-TOKEN': csrfToken()
             },
             success: function(data) {
                 setTimeout(function() {
@@ -200,7 +197,7 @@ function startThreadDump()
         data: data,
         headers: {
             'Accept': 'application/json',
-            'X-CSRF-TOKEN': token
+            'X-CSRF-TOKEN': csrfToken()
         },
         success: function(data) {
             setTimeout(function() {
@@ -219,7 +216,7 @@ function stopThreadDump()
         url: $('#start-button').attr('data-stop-url'),
         headers: {
             'Accept': 'application/json',
-            'X-CSRF-TOKEN': token
+            'X-CSRF-TOKEN': csrfToken()
         },
         success: function(data) {
             setTimeout(function() {
@@ -331,10 +328,10 @@ function renderAnalysis(a) {
         out.html('<p class="quiet">' + escapeHtml(a && a.error ? a.error : 'No analysis.') + '</p>');
         return;
     }
-    var scope = (a.dumpCount > 1) ? (a.dumpCount + ' dumps') : '1 dump';
+    var scope = (a.dumpCount > 1) ? (num(a.dumpCount) + ' dumps') : '1 dump';
     var html = '<h3>Thread-dump analysis</h3>'
-        + '<p class="quiet td-note">' + scope + ', ' + a.snapshotCount + ' snapshot(s) pooled, '
-        + a.threadCount + ' threads (latest snapshot).</p>';
+        + '<p class="quiet td-note">' + scope + ', ' + num(a.snapshotCount) + ' snapshot(s) pooled, '
+        + num(a.threadCount) + ' threads (latest snapshot).</p>';
 
     // 1. FINDINGS — the answers, up top. Colour signals severity; wording carries confidence
     //    (deadlock asserts as fact; everything else is softened as a possibility).
@@ -365,7 +362,7 @@ function renderAnalysis(a) {
             + '<table class="cache-worst"><thead><tr><th>Pool</th><th>Active</th><th>Total</th></tr></thead><tbody>';
         for (var p = 0; p < a.pools.length; p++) {
             var pl = a.pools[p];
-            html += '<tr><td>' + escapeHtml(pl.pool) + '</td><td>' + pl.active + '</td><td>' + pl.total + '</td></tr>';
+            html += '<tr><td>' + escapeHtml(pl.pool) + '</td><td>' + num(pl.active) + '</td><td>' + num(pl.total) + '</td></tr>';
         }
         html += '</tbody></table>';
     }
@@ -387,7 +384,7 @@ function renderAnalysis(a) {
         for (var fc = 0; fc < a.topFrames.length; fc++) {
             var cl = a.topFrames[fc];
             var stack = (cl.frames || []).map(escapeHtml).join('<br><span class="quiet">&nbsp;&nbsp;&larr; </span>');
-            html += '<tr><td>' + cl.count + '</td><td><strong>' + escapeHtml(cl.component) + '</strong></td><td>' + stack + '</td></tr>';
+            html += '<tr><td>' + num(cl.count) + '</td><td><strong>' + escapeHtml(cl.component) + '</strong></td><td>' + stack + '</td></tr>';
         }
         html += '</tbody></table>';
     } else {
@@ -417,8 +414,8 @@ function renderAnalysis(a) {
             + '<th>RUNNABLE</th><th>BLOCKED</th><th>WAITING</th><th>TIMED_WAITING</th></tr></thead><tbody>';
         for (var d = 0; d < a.trend.length; d++) {
             var tr = a.trend[d];
-            html += '<tr><td>' + escapeHtml(tr.label) + '</td><td>' + tr.total + '</td><td>' + tr.RUNNABLE
-                + '</td><td>' + tr.BLOCKED + '</td><td>' + tr.WAITING + '</td><td>' + tr.TIMED_WAITING + '</td></tr>';
+            html += '<tr><td>' + escapeHtml(tr.label) + '</td><td>' + num(tr.total) + '</td><td>' + num(tr.RUNNABLE)
+                + '</td><td>' + num(tr.BLOCKED) + '</td><td>' + num(tr.WAITING) + '</td><td>' + num(tr.TIMED_WAITING) + '</td></tr>';
         }
         html += '</tbody></table>';
     }
@@ -427,9 +424,9 @@ function renderAnalysis(a) {
         + '<th>RUNNABLE</th><th>BLOCKED</th><th>WAITING</th><th>TIMED_WAITING</th><th>Total</th></tr></thead><tbody>';
     for (var i = 0; i < a.stateHistogram.length; i++) {
         var c = a.stateHistogram[i].counts || {};
-        html += '<tr><td>#' + (i + 1) + '</td><td>' + (c.RUNNABLE || 0) + '</td><td>' + (c.BLOCKED || 0)
-            + '</td><td>' + (c.WAITING || 0) + '</td><td>' + (c.TIMED_WAITING || 0) + '</td><td>'
-            + a.stateHistogram[i].total + '</td></tr>';
+        html += '<tr><td>#' + (i + 1) + '</td><td>' + num(c.RUNNABLE || 0) + '</td><td>' + num(c.BLOCKED || 0)
+            + '</td><td>' + num(c.WAITING || 0) + '</td><td>' + num(c.TIMED_WAITING || 0) + '</td><td>'
+            + num(a.stateHistogram[i].total) + '</td></tr>';
     }
     html += '</tbody></table>';
 
@@ -444,6 +441,19 @@ function escapeHtml(s) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+}
+
+// Returns an escaped href only for http(s) URLs; anything else (javascript:, data:, …)
+// collapses to '#' so a crafted media URL cannot run script on click.
+function safeUrl(url) {
+    var s = String(url === undefined || url === null ? '' : url).trim();
+    return /^https?:\/\//i.test(s) ? escapeHtml(s) : '#';
+}
+
+// Escapes a field expected to be numeric. Counts come from the server as numbers, but
+// escaping guards against a malformed non-numeric value ever reaching innerHTML.
+function num(n) {
+    return escapeHtml(n === undefined || n === null ? 0 : n);
 }
 
 function analysisTable(title, rows, keys, headers, emptyMsg, note) {

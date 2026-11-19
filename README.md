@@ -127,7 +127,7 @@ Captures a series of thread dumps over a period of time from the selected node g
 
 - **Interval:** configurable (e.g. 5 s, 10 s, 30 s, 60 s, 5 min, 15 min, 30 min).
 - **Start / Stop:** when you stop, the dumps are packaged as a zip file.
-- **Save Thread Dump** stores the zip as a Commerce Media for later download; **Clean up thread Dump** removes stored dump media.
+- **Save Thread Dump** stores the zip as a Commerce Media for later download; **Clean up Thread Dump** removes stored dump media.
 - **History table:** creation time and media URL, with **Download** and **Analyze** actions per row.
 - **Analyze selected (max 5):** compares several dumps together and summarises the findings — thread states, stuck threads, lock contention and the trend over time.
 
