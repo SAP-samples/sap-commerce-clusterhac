@@ -8,3 +8,33 @@ button:disabled {
   background: #F5F5F5;
   color : #C3C3C3;
 }
+
+/* Thread-dump page layout (moved out of inline styles in thread-dump.jsp) */
+.td-interval {
+  float: left;
+}
+.td-clear {
+  clear: both;
+}
+.td-btn-left {
+  float: left;
+}
+.td-btn-right {
+  float: right;
+}
+#tdScopeChip {
+  display: none;
+}
+#podLoad,
+#podList {
+  display: none;
+}
+.td-analyze-bar {
+  margin-bottom: 8px;
+}
+.td-analyze-bar .quiet {
+  margin-left: 8px;
+}
+#result-table {
+  width: 100%;
+}

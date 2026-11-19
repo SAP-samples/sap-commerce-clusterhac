@@ -28,7 +28,8 @@
                 <hac:note>
                     This page provides the possibility to select thread dumps over a period of time. You can
                     select in which time periods the thread dumps are being collected. When you click stop,
-                    the thread dumps will stored locally as zip File. Dumps will be stored to Media once you click Save media.
+                    the thread dumps will be stored locally as a zip file. Dumps will be stored to Media once
+                    you click Save Thread Dump.
                 </hac:note>
                 <br/>
 
@@ -36,7 +37,7 @@
                     <div id="spinnerWrapper">
                         <img id="spinner" src="<c:url value="/static/img/spinner.gif"/>" alt="spinner"/>
                     </div>
-                    <div style="float: left">Interval:
+                    <div class="td-interval">Interval:
                         <select id="interval">
                             <option value="5000">5 sec</option>
                             <option value="10000">10 sec</option>
@@ -48,38 +49,37 @@
                         </select>
 
                 	</div>
-                    <div class="script-target" style="clear:both">
+                    <div class="script-target td-clear">
                         <label class="script-target-label" for="nodeGroups">Target node groups</label>
                         <select id="nodeGroups" multiple>
                             <c:forEach items="${nodeGroups}" var="nodeGroup">
                                 <option value="${nodeGroup}">${nodeGroup}</option>
                             </c:forEach>
                         </select>
-                        <span id="tdScopeChip" class="script-scope-chip" style="display:none"></span>
+                        <span id="tdScopeChip" class="script-scope-chip"></span>
                         <div class="script-pods">
                             <label><input type="checkbox" id="podMode"/> Target specific pods instead</label>
-                            <button type="button" id="podLoad" style="display:none">Load pods</button>
+                            <button type="button" id="podLoad">Load pods</button>
                             <span id="podMsg" class="quiet"></span>
-                            <div id="podList" class="pod-list" style="display:none"></div>
+                            <div id="podList" class="pod-list"></div>
                         </div>
                     </div>
 
                     <hr>
 
-                    <button id="start-button" style="float:left" data-start-url="${startUrl}" data-stop-url="${stopUrl}" disabled >Start Thread Dump</button>
-<%--                    <button id="stop-button" style="float:left" data-url="${stopUrl}" disabled >Stop</button>--%>
-                    <button id="save-media-button" style="float:left" data-url="${saveMediaUrl}">Save Thread Dump</button>
-                    <button id="clean-up-media-button" style="float:right" data-url="${cleanUpMediaUrl}">Clean up thread Dump</button>
+                    <button id="start-button" class="td-btn-left" data-start-url="${startUrl}" data-stop-url="${stopUrl}" disabled>Start Thread Dump</button>
+                    <button id="save-media-button" class="td-btn-left" data-url="${saveMediaUrl}">Save Thread Dump</button>
+                    <button id="clean-up-media-button" class="td-btn-right" data-url="${cleanUpMediaUrl}">Clean up thread Dump</button>
                     <hr>
                     <div id="accordion"
                          data-refreshThreadDumpInfoUrl="<c:url value="/cluster/thread-dump/dumpinfos"/>"
                          data-refreshThreadDumpInfoUrlResults="<c:url value="/cluster/thread-dump/dumpinfos/results"/>" >
                     </div>
-                    <div class="chac" style="margin-bottom:8px;">
+                    <div class="chac td-analyze-bar">
                         <button id="analyze-selected-button" type="button" disabled>Analyze selected (0)</button>
-                        <span class="quiet" style="margin-left:8px;">Select up to 5 dumps to correlate them (states, stuck threads, trend over time).</span>
+                        <span class="quiet">Select up to 5 dumps to correlate them (states, stuck threads, trend over time).</span>
                     </div>
-                    <table id="result-table" style="width:100%" data-url="${resultsUrl}"
+                    <table id="result-table" data-url="${resultsUrl}"
                         data-analyze-url="<c:url value="/cluster/thread-dump/analyze"/>">
                         <thead>
                             <tr>
@@ -91,7 +91,7 @@
                             </tr>
                         </thead>
                 	</table>
-                    <button id="refresh-button" style="float:right">Refresh</button>
+                    <button id="refresh-button" class="td-btn-right">Refresh</button>
                     <%-- Analysis summary (populated when a dump's "Analyze" is clicked) --%>
                     <div id="td-analysis" class="chac marginTop"></div>
                 </div>

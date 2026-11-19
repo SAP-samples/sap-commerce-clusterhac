@@ -1,9 +1,16 @@
-var threadDumpEnabled , threadDumpUpdateIntervalId ;
+var threadDumpEnabled, threadDumpUpdateIntervalId;
 var nodeGroupValues = [];
 var selectedNodeIds = [];
 var token;
+
+var REFRESH_INTERVAL_MS = 10000;
+
+function csrfToken() {
+    return $("meta[name='_csrf']").attr("content");
+}
+
 $(document).ready(function() {
-     token = $("meta[name='_csrf']").attr("content");
+    token = csrfToken();
 
     refreshClusterThreadDumpInfo();
 
@@ -92,37 +99,25 @@ $(document).ready(function() {
     });
 
     $('#nodeGroups').change(function() {
-        nodeGroupValues = [];
-        $('#nodeGroups :selected').each(function(i, selected) {
-            nodeGroupValues.push($(nodeGroups).val()[i]);
-        });
-        if(nodeGroupValues.length > 0  ){
-            if($("#start-button").is(':disabled')){
-                document.getElementById("start-button").disabled = false;
-            }
+        nodeGroupValues = $('#nodeGroups').val() || [];
+        if (nodeGroupValues.length > 0 && $('#start-button').is(':disabled')) {
+            $('#start-button').prop('disabled', false);
         }
     });
 
     $("#start-button").click(function(event) {
         threadDumpEnabled = !threadDumpEnabled;
 
-        // if(! $("#start-button").is(':disabled')){
-        //     document.getElementById("start-button").disabled = true;
-        // }
-        //
-        // if( $("#stop-button").is(':disabled')){
-        //     document.getElementById("stop-button").disabled = false;
-        // }
         updateThreadDumpUI();
-        if(threadDumpEnabled){
+        if (threadDumpEnabled) {
             startThreadDump();
-            threadDumpUpdateIntervalId = setInterval("refreshClusterThreadDumpInfo()", 10000);
+            threadDumpUpdateIntervalId = setInterval(refreshClusterThreadDumpInfo, REFRESH_INTERVAL_MS);
         } else {
             stopThreadDump();
-            if( $("#start-button").is(':disabled') && nodeGroupValues.length > 0){
-                document.getElementById("start-button").disabled = false;
-            } else if( !$("#start-button").is(':disabled') && nodeGroupValues.length == 0){
-                document.getElementById("start-button").disabled = true;
+            if ($("#start-button").is(':disabled') && nodeGroupValues.length > 0) {
+                $('#start-button').prop('disabled', false);
+            } else if (!$("#start-button").is(':disabled') && nodeGroupValues.length === 0) {
+                $('#start-button').prop('disabled', true);
             }
         }
     });
@@ -147,7 +142,7 @@ $(document).ready(function() {
                 var hasTarget = $('#podMode').is(':checked')
                     ? (selectedNodeIds && selectedNodeIds.length > 0)
                     : (nodeGroupValues && nodeGroupValues.length > 0);
-                if (hasTarget) { document.getElementById("start-button").disabled = false; }
+                if (hasTarget) { $('#start-button').prop('disabled', false); }
                 setTimeout(function() {
                     dataTable.api().ajax.reload(function() {
                         dataTable.api().columns.adjust();
@@ -213,8 +208,6 @@ function startThreadDump()
 
 function stopThreadDump()
 {
-    // $('#spinnerWrapper').show();
-
     $.ajax({
         type: "POST",
         url: $('#start-button').attr('data-stop-url'),
@@ -231,10 +224,8 @@ function stopThreadDump()
     });
 }
 
-///
 function refreshClusterThreadDumpInfo()
 {
-    var token = $("meta[name='_csrf']").attr("content");
     var url = $('#accordion').attr('data-refreshThreadDumpInfoUrl');
     $.ajax({
         url : url,
@@ -242,75 +233,66 @@ function refreshClusterThreadDumpInfo()
         dataType: 'json',
         headers : {
             'Accept' : 'application/json',
-            'X-CSRF-TOKEN' : token
+            'X-CSRF-TOKEN' : csrfToken()
         },
         success : function(data) {
             // server returns JSON object: { uuid: "..." }
-            var scriptUid = data.uuid;
-            getRefreshClusterThreadDumpInfo(scriptUid)
-
+            getRefreshClusterThreadDumpInfo(data.uuid);
         },
         error: hac.global.err
     });
 }
-///
+
 function getRefreshClusterThreadDumpInfo(scriptUid)
 {
     threadDumpEnabled = false;
-    var token = $("meta[name='_csrf']").attr("content");
     var url = $('#accordion').attr('data-refreshThreadDumpInfoUrlResults');
     $.ajax({
-        url:url,
-        type:'GET',
+        url: url,
+        type: 'GET',
         dataType: 'json',
-        headers:{
-            'Accept':'application/json',
-            'X-CSRF-TOKEN' : token
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken()
         },
-        data:{
-            uuid: scriptUid,
+        data: {
+            uuid: scriptUid
         },
         success: function(data) {
-            debug.log(data);
-
             var threadDumpEnabledCount = 0;
 
-            for (pos in data) {
+            for (var pos in data) {
+                if (!data.hasOwnProperty(pos)) { continue; }
                 var cluster = data[pos];
-                // checking log enable
-                if(cluster.dumpProcessing){
-                    ++ threadDumpEnabledCount;
-                    if(nodeGroupValues.length < threadDumpEnabledCount){
+                if (cluster.dumpProcessing) {
+                    ++threadDumpEnabledCount;
+                    if (nodeGroupValues.length < threadDumpEnabledCount) {
                         nodeGroupValues.push(cluster.clusterGroup);
-                        //Get select object
                         var objSelect = document.getElementById("nodeGroups");
-                        //Set selected
-                        cluster.clusterGroup.forEach(item => setSelectedValue(objSelect, item));
+                        cluster.clusterGroup.forEach(function(item) { setSelectedValue(objSelect, item); });
                     }
                 }
             }
-            if(threadDumpEnabledCount > 0){
-                threadDumpEnabled = true
-                if($("#start-button").is(':disabled')){
-                    document.getElementById("start-button").disabled = false;
-                }
-            } else{
-                threadDumpEnabled = false
+
+            threadDumpEnabled = threadDumpEnabledCount > 0;
+            if (threadDumpEnabled && $("#start-button").is(':disabled')) {
+                $('#start-button').prop('disabled', false);
             }
             updateThreadDumpUI();
-            if (threadDumpEnabled && !threadDumpUpdateIntervalId){
-                threadDumpUpdateIntervalId = setInterval("refreshClusterThreadDumpInfo()", 10000);
-            } else if(! threadDumpEnabled && threadDumpUpdateIntervalId ){
+            if (threadDumpEnabled && !threadDumpUpdateIntervalId) {
+                threadDumpUpdateIntervalId = setInterval(refreshClusterThreadDumpInfo, REFRESH_INTERVAL_MS);
+            } else if (!threadDumpEnabled && threadDumpUpdateIntervalId) {
                 clearInterval(threadDumpUpdateIntervalId);
+                threadDumpUpdateIntervalId = null;
             }
         },
         error: hac.global.err
     });
 }
-//
+
 function setSelectedValue(selectObj, valueToSet) {
     for (var i = 0; i < selectObj.options.length; i++) {
-        if (selectObj.options[i].text== valueToSet) {
+        if (selectObj.options[i].text === valueToSet) {
             selectObj.options[i].selected = true;
             return;
         }
@@ -326,12 +308,11 @@ function updateThreadDumpUI()
 function analyzeThreadDumps(codes) {
     var out = $('#td-analysis');
     out.html('<p class="quiet">Analyzing…</p>');
-    var token = $("meta[name='_csrf']").attr("content");
     // jQuery serialises an array param as repeated code=... which Spring binds to List<String>.
     $.ajax({
         url: $('#result-table').attr('data-analyze-url'),
         type: 'GET', dataType: 'json', traditional: true,
-        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': token },
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
         data: { code: codes },
         success: function(a) { renderAnalysis(a); },
         error: function(xhr) { out.html('<p class="quiet">Analysis request failed.</p>'); hac.global.err(xhr); }
@@ -341,7 +322,7 @@ function analyzeThreadDumps(codes) {
 function renderAnalysis(a) {
     var out = $('#td-analysis');
     if (!a || a.error) {
-        out.html('<p class="quiet">' + (a && a.error ? a.error : 'No analysis.') + '</p>');
+        out.html('<p class="quiet">' + escapeHtml(a && a.error ? a.error : 'No analysis.') + '</p>');
         return;
     }
     var scope = (a.dumpCount > 1) ? (a.dumpCount + ' dumps') : '1 dump';
@@ -355,9 +336,9 @@ function renderAnalysis(a) {
     if (a.findings && a.findings.length) {
         for (var f = 0; f < a.findings.length; f++) {
             var fd = a.findings[f];
-            html += '<div class="td-finding td-' + (fd.severity || 'info') + '">'
-                + '<strong>' + fd.title + '</strong>'
-                + '<div class="td-finding-detail">' + fd.detail + '</div></div>';
+            html += '<div class="td-finding td-' + escapeHtml(fd.severity || 'info') + '">'
+                + '<strong>' + escapeHtml(fd.title) + '</strong>'
+                + '<div class="td-finding-detail">' + escapeHtml(fd.detail) + '</div></div>';
         }
     } else {
         html += '<p class="quiet td-note">No findings.</p>';
@@ -378,7 +359,7 @@ function renderAnalysis(a) {
             + '<table class="cache-worst"><thead><tr><th>Pool</th><th>Active</th><th>Total</th></tr></thead><tbody>';
         for (var p = 0; p < a.pools.length; p++) {
             var pl = a.pools[p];
-            html += '<tr><td>' + pl.pool + '</td><td>' + pl.active + '</td><td>' + pl.total + '</td></tr>';
+            html += '<tr><td>' + escapeHtml(pl.pool) + '</td><td>' + pl.active + '</td><td>' + pl.total + '</td></tr>';
         }
         html += '</tbody></table>';
     }
@@ -399,8 +380,8 @@ function renderAnalysis(a) {
         html += '<table class="cache-worst"><thead><tr><th>Threads</th><th>Component</th><th>Top frames</th></tr></thead><tbody>';
         for (var fc = 0; fc < a.topFrames.length; fc++) {
             var cl = a.topFrames[fc];
-            var stack = (cl.frames || []).join('<br><span class="quiet">&nbsp;&nbsp;&larr; </span>');
-            html += '<tr><td>' + cl.count + '</td><td><strong>' + cl.component + '</strong></td><td>' + stack + '</td></tr>';
+            var stack = (cl.frames || []).map(escapeHtml).join('<br><span class="quiet">&nbsp;&nbsp;&larr; </span>');
+            html += '<tr><td>' + cl.count + '</td><td><strong>' + escapeHtml(cl.component) + '</strong></td><td>' + stack + '</td></tr>';
         }
         html += '</tbody></table>';
     } else {
@@ -430,7 +411,7 @@ function renderAnalysis(a) {
             + '<th>RUNNABLE</th><th>BLOCKED</th><th>WAITING</th><th>TIMED_WAITING</th></tr></thead><tbody>';
         for (var d = 0; d < a.trend.length; d++) {
             var tr = a.trend[d];
-            html += '<tr><td>' + tr.label + '</td><td>' + tr.total + '</td><td>' + tr.RUNNABLE
+            html += '<tr><td>' + escapeHtml(tr.label) + '</td><td>' + tr.total + '</td><td>' + tr.RUNNABLE
                 + '</td><td>' + tr.BLOCKED + '</td><td>' + tr.WAITING + '</td><td>' + tr.TIMED_WAITING + '</td></tr>';
         }
         html += '</tbody></table>';
@@ -450,7 +431,13 @@ function renderAnalysis(a) {
 }
 
 function escapeHtml(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    if (s === undefined || s === null) { return ''; }
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 function analysisTable(title, rows, keys, headers, emptyMsg, note) {
@@ -464,7 +451,7 @@ function analysisTable(title, rows, keys, headers, emptyMsg, note) {
         html += '<tr>';
         for (var k = 0; k < keys.length; k++) {
             var v = rows[r][keys[k]];
-            html += '<td>' + (v === undefined || v === null ? '' : v) + '</td>';
+            html += '<td>' + (v === undefined || v === null ? '' : escapeHtml(v)) + '</td>';
         }
         html += '</tr>';
     }
