@@ -5,6 +5,8 @@ package com.sap.commerce.clusterhac.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -31,8 +33,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 
 /**
- * Unit tests for {@link DefaultClusterThreadDumpService#streamThreadDumpMedia(String)} — the blank-code
- * guard, the code filter over the DAO result, and the media-stream mapping. Mockito only; no platform.
+ * Unit tests for {@link DefaultClusterThreadDumpService}: constructor null-checks,
+ * {@code findThreadDumpMedia} null-result safety, {@code cleanUpThreadDumpMedia} (empty vs.
+ * non-empty), and {@code streamThreadDumpMedia} (blank-code guard, code filter, media-stream
+ * mapping). Mockito only; no platform.
  */
 @UnitTest
 @ExtendWith(MockitoExtension.class)
@@ -97,5 +101,47 @@ class DefaultClusterThreadDumpServiceTest
 
 		assertNull(result);
 		verify(mediaService, never()).getStreamFromMedia(any());
+	}
+
+	@Test
+	void findThreadDumpMediaReturnsEmptyListWhenDaoReturnsNull()
+	{
+		when(clusterThreadDumpDao.findThreadDumpMedia()).thenReturn(null);
+
+		assertTrue(service.findThreadDumpMedia().isEmpty(), "a null DAO result must surface as an empty list");
+	}
+
+	@Test
+	void cleanUpRemovesAllFoundMedia()
+	{
+		final MediaModel m1 = media("dump-1");
+		final MediaModel m2 = media("dump-2");
+		final List<MediaModel> found = List.of(m1, m2);
+		when(clusterThreadDumpDao.findThreadDumpMedia()).thenReturn(found);
+
+		service.cleanUpThreadDumpMedia();
+
+		verify(modelService).removeAll(found);
+	}
+
+	@Test
+	void cleanUpDoesNothingWhenNoMedia()
+	{
+		when(clusterThreadDumpDao.findThreadDumpMedia()).thenReturn(List.of());
+
+		service.cleanUpThreadDumpMedia();
+
+		verify(modelService, never()).removeAll(any());
+	}
+
+	@Test
+	void constructorRejectsNullDependencies()
+	{
+		assertThrows(NullPointerException.class,
+				() -> new DefaultClusterThreadDumpService(null, modelService, mediaService));
+		assertThrows(NullPointerException.class,
+				() -> new DefaultClusterThreadDumpService(clusterThreadDumpDao, null, mediaService));
+		assertThrows(NullPointerException.class,
+				() -> new DefaultClusterThreadDumpService(clusterThreadDumpDao, modelService, null));
 	}
 }

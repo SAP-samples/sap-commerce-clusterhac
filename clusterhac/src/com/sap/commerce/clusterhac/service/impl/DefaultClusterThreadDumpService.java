@@ -6,10 +6,16 @@ import de.hybris.platform.core.model.media.MediaModel;
 import de.hybris.platform.servicelayer.media.MediaService;
 import de.hybris.platform.servicelayer.model.ModelService;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultClusterThreadDumpService implements ClusterThreadDumpService {
+
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultClusterThreadDumpService.class);
 
   private final ClusterThreadDumpDao clusterThreadDumpDao;
   private final ModelService modelService;
@@ -17,19 +23,26 @@ public class DefaultClusterThreadDumpService implements ClusterThreadDumpService
 
   public DefaultClusterThreadDumpService(ClusterThreadDumpDao clusterThreadDumpDao,
       ModelService modelService, MediaService mediaService) {
-    this.clusterThreadDumpDao = clusterThreadDumpDao;
-    this.modelService = modelService;
-    this.mediaService = mediaService;
+    this.clusterThreadDumpDao = Objects.requireNonNull(clusterThreadDumpDao, "clusterThreadDumpDao");
+    this.modelService = Objects.requireNonNull(modelService, "modelService");
+    this.mediaService = Objects.requireNonNull(mediaService, "mediaService");
   }
 
   @Override
   public List<MediaModel> findThreadDumpMedia() {
-    return clusterThreadDumpDao.findThreadDumpMedia();
+    final List<MediaModel> media = clusterThreadDumpDao.findThreadDumpMedia();
+    return media != null ? media : Collections.emptyList();
   }
 
   @Override
   public void cleanUpThreadDumpMedia() {
-    modelService.removeAll(findThreadDumpMedia());
+    final List<MediaModel> media = findThreadDumpMedia();
+    if (media.isEmpty()) {
+      LOG.debug("No thread-dump media to clean up");
+      return;
+    }
+    LOG.info("Removing {} thread-dump media", media.size());
+    modelService.removeAll(media);
   }
 
   @Override
