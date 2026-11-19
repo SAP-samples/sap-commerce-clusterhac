@@ -114,6 +114,9 @@ $(document).ready(function() {
         updateThreadDumpUI();
         if (threadDumpEnabled) {
             startThreadDump();
+            // Avoid leaking a poller: getRefreshClusterThreadDumpInfo may already have started one
+            // on page load when a dump was in progress.
+            if (threadDumpUpdateIntervalId) { clearInterval(threadDumpUpdateIntervalId); }
             threadDumpUpdateIntervalId = setInterval(refreshClusterThreadDumpInfo, REFRESH_INTERVAL_MS);
         } else {
             stopThreadDump();
@@ -395,7 +398,7 @@ function renderAnalysis(a) {
     var cpuNote;
     if (a.cpuMode === 'delta') {
         var win = (a.spanMinutes >= 0)
-            ? (a.spanMinutes >= 60 ? (' over a ~' + Math.round(a.spanMinutes / 60) + 'h window') : (' over a ~' + a.spanMinutes + 'min window'))
+            ? (a.spanMinutes >= 60 ? (' over a ~' + num(Math.round(a.spanMinutes / 60)) + 'h window') : (' over a ~' + num(a.spanMinutes) + 'min window'))
             : '';
         cpuNote = 'CPU consumed <em>during this recording</em> (delta, first&rarr;last snapshot)' + win + '.'
             + (a.spanMinutes > 15 ? ' Wide window — this is total CPU across the range, not a tight sample; a short recording gives a sharper "hot now" read.' : '');
