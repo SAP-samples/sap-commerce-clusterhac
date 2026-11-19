@@ -68,8 +68,8 @@
 
                     <button id="start-button" style="float:left" data-start-url="${startUrl}" data-stop-url="${stopUrl}" disabled >Start Thread Dump</button>
 <%--                    <button id="stop-button" style="float:left" data-url="${stopUrl}" disabled >Stop</button>--%>
-                    <button id="save-media-button" style="float:left" data-url="${saveMediaUrl}">Save media</button>
-                    <button id="clean-up-media-button" style="float:right" data-url="${cleanUpMediaUrl}">Clean up media</button>
+                    <button id="save-media-button" style="float:left" data-url="${saveMediaUrl}">Save Thread Dump</button>
+                    <button id="clean-up-media-button" style="float:right" data-url="${cleanUpMediaUrl}">Clean up thread Dump</button>
                     <hr>
                     <div id="accordion"
                          data-refreshThreadDumpInfoUrl="<c:url value="/cluster/thread-dump/dumpinfos"/>"
