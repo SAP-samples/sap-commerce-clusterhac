@@ -26,10 +26,11 @@
                 <br/>
                 <h2>${pageTitle} <c:if test="${not empty nodeId}"><span class="chac-pod-badge"><c:choose><c:when test="${not empty host}">${host}</c:when><c:otherwise>Node ${nodeId}</c:otherwise></c:choose></span></c:if></h2>
                 <hac:note>
-                    This page provides the possibility to select thread dumps over a period of time. You can
-                    select in which time periods the thread dumps are being collected. When you click stop,
-                    the thread dumps will be stored locally as a zip file. Dumps will be stored to Media once
-                    you click Save Thread Dump.
+                    This page lets you record thread dumps over a period of time. Choose a collection
+                    interval and select your target nodes, then click <strong>Start Thread Dump</strong>
+                    to begin recording. Click <strong>Stop</strong> to end recording; the dumps are held
+                    locally as a zip file. Click <strong>Save Thread Dump</strong> to store them as Media,
+                    where you can download or analyze them.
                 </hac:note>
                 <br/>
 
