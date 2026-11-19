@@ -57,12 +57,12 @@
                                 <option value="${nodeGroup}">${nodeGroup}</option>
                             </c:forEach>
                         </select>
-                        <span id="tdScopeChip" class="script-scope-chip"></span>
+                        <span id="tdScopeChip" class="script-scope-chip" style="display:none"></span>
                         <div class="script-pods">
                             <label><input type="checkbox" id="podMode"/> Target specific pods instead</label>
-                            <button type="button" id="podLoad">Load pods</button>
+                            <button type="button" id="podLoad" style="display:none">Load pods</button>
                             <span id="podMsg" class="quiet"></span>
-                            <div id="podList" class="pod-list"></div>
+                            <div id="podList" class="pod-list" style="display:none"></div>
                         </div>
                     </div>
 
@@ -80,7 +80,7 @@
                         <button id="analyze-selected-button" type="button" disabled>Analyze selected (0)</button>
                         <span class="quiet">Select up to 5 dumps to correlate them (states, stuck threads, trend over time).</span>
                     </div>
-                    <table id="result-table" data-url="${resultsUrl}"
+                    <table id="result-table" style="width:100%" data-url="${resultsUrl}"
                         data-analyze-url="<c:url value="/cluster/thread-dump/analyze"/>">
                         <thead>
                             <tr>

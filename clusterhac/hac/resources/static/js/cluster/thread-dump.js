@@ -52,12 +52,18 @@ $(document).ready(function() {
                         + encodeURIComponent(data) + '">';
                 }
             },
-            {"data": "creationTime"},
-            {"data": "url"},
+            {
+                "data": "creationTime",
+                "render": function(data) { return escapeHtml(data); }
+            },
+            {
+                "data": "url",
+                "render": function(data) { return escapeHtml(data); }
+            },
             {
                 "data": "url",
                 "render": function(data) {
-                    return '<a href="' + data + '">Download</a>'
+                    return '<a href="' + escapeHtml(data) + '">Download</a>'
                 }
             },
             {

@@ -9,7 +9,10 @@ button:disabled {
   color : #C3C3C3;
 }
 
-/* Thread-dump page layout (moved out of inline styles in thread-dump.jsp) */
+/* Thread-dump page layout (moved out of inline styles in thread-dump.jsp).
+   NOTE: this stylesheet is shared with heap-dump.jsp, so avoid ID rules that
+   target elements both pages use (e.g. #podLoad / #podList) — scope those via
+   inline styles or page-specific classes instead. */
 .td-interval {
   float: left;
 }
@@ -22,19 +25,9 @@ button:disabled {
 .td-btn-right {
   float: right;
 }
-#tdScopeChip {
-  display: none;
-}
-#podLoad,
-#podList {
-  display: none;
-}
 .td-analyze-bar {
   margin-bottom: 8px;
 }
 .td-analyze-bar .quiet {
   margin-left: 8px;
-}
-#result-table {
-  width: 100%;
 }
