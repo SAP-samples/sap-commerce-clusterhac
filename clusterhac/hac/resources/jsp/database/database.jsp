@@ -29,7 +29,7 @@
 					</div>
 
 					<c:if test="${empty clsURL}">
-						<p class="quiet"><strong>Note:</strong> the "view logs in Kibana" link is unavailable because <code>ccv2.services.logging</code> is not set. JDBC logging toggles below work without it.</p>
+						<p class="quiet"><strong>Note:</strong> the "View logs in CLS" link is unavailable because <code>ccv2.services.logging</code> is not set. JDBC logging toggles below work without it.</p>
 					</c:if>
 
 					<table id="clusternodes" data-updateNodesUrl="<c:url value="/cluster/database/data"/>"

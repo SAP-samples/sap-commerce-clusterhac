@@ -1,5 +1,5 @@
 var clusterLogEnabled, clusterLogUpdateIntervalId;
-var kibanaUrl = "JDBC Log Url";
+var kibanaUrl = "View logs in CLS";
 var nodestable;
 var scriptUid = "";
 const traceParamsMap = new Map();
