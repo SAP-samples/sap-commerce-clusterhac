@@ -1,44 +1,49 @@
 import de.hybris.platform.cmsfacades.data.MediaData
 import de.hybris.platform.cmsfacades.dto.MediaFileDto
+import de.hybris.platform.cmsfacades.exception.ValidationException
 import de.hybris.platform.cmsfacades.media.MediaFacade
 import de.hybris.platform.hac.facade.ThreadDumpCollector
-import de.hybris.platform.cmsfacades.exception.ValidationException
 import org.apache.commons.io.FilenameUtils
 import org.slf4j.LoggerFactory
 
+import java.nio.file.Files
 import java.nio.file.Path
 
-def LOG = LoggerFactory.getLogger("save-media")
+final def log = LoggerFactory.getLogger("save-media")
 
-ThreadDumpCollector threadDumpCollector = threadDumpCollector
+// Bindings provided by the script executor
+final ThreadDumpCollector collector = threadDumpCollector
+final MediaFacade facade = mediaFacade
 
-Path file = threadDumpCollector.getResult()
+final Path file = collector.result
+final String host = InetAddress.localHost.canonicalHostName
+final String fileName = FilenameUtils.normalize("thread_dump_${host}_${file.fileName}")
+final long fileSize = Files.size(file)
 
-def host = InetAddress.getLocalHost().getCanonicalHostName()
-def fileName = FilenameUtils.normalize("thread_dump_" + host + "_" + file.getFileName())
+log.info("Copy {} ({} bytes) to media: {}", file, fileSize, fileName)
 
-LOG.info("Copy " + file + " to media: " + fileName)
+final MediaData mediaData = new MediaData().with {
+    code = fileName
+    catalogId = "Default"
+    catalogVersion = "Staged"
+    description = "Thread dump"
+    altText = "Thread dump"
+    it
+}
 
-MediaFacade mediaFacade = mediaFacade
-
-MediaData mediaData = new MediaData()
-mediaData.setCode(fileName)
-mediaData.setCatalogId("Default")
-mediaData.setCatalogVersion("Staged")
-mediaData.setDescription("Thread dump")
-mediaData.setAltText("Thread dump")
-
-MediaFileDto mediaFile = new MediaFileDto()
-mediaFile.setMime("application/csv")
-mediaFile.setName(fileName + ".zip")
+final MediaFileDto mediaFile = new MediaFileDto().with {
+    mime = "application/zip"
+    name = "${fileName}.zip"
+    it
+}
 
 file.toFile().withInputStream { inputStream ->
-    mediaFile.setInputStream(inputStream)
-    mediaFile.setSize(inputStream.available())
-    try{
-        mediaData = mediaFacade.addMedia(mediaData, mediaFile)
-    }catch(ValidationException ve){
-        LOG.error("Thread dump validation exceptions: " + ve.getMessage())
+    mediaFile.inputStream = inputStream
+    mediaFile.size = fileSize
+    try {
+        facade.addMedia(mediaData, mediaFile)
+        log.info("Saved packed to: {}", fileName)
+    } catch (ValidationException ve) {
+        log.error("Thread dump validation exceptions: {}", ve.message)
     }
-    LOG.info("Saved packed to: " + fileName)
 }

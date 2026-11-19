@@ -8,3 +8,26 @@ button:disabled {
   background: #F5F5F5;
   color : #C3C3C3;
 }
+
+/* Thread-dump page layout (moved out of inline styles in thread-dump.jsp).
+   NOTE: this stylesheet is shared with heap-dump.jsp, so avoid ID rules that
+   target elements both pages use (e.g. #podLoad / #podList) — scope those via
+   inline styles or page-specific classes instead. */
+.td-interval {
+  float: left;
+}
+.td-clear {
+  clear: both;
+}
+.td-btn-left {
+  float: left;
+}
+.td-btn-right {
+  float: right;
+}
+.td-analyze-bar {
+  margin-bottom: 8px;
+}
+.td-analyze-bar .quiet {
+  margin-left: 8px;
+}

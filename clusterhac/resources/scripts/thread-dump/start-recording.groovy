@@ -1,12 +1,12 @@
 import org.slf4j.LoggerFactory
 
-def LOG = LoggerFactory.getLogger("start-recording")
+final def log = LoggerFactory.getLogger("start-recording")
 
-if (!threadDumpCollector.isCollecting())
-{
+final String host = InetAddress.localHost.canonicalHostName
+
+if (threadDumpCollector.collecting) {
+    log.info("Thread dump is already running on: {}", host)
+} else {
     threadDumpCollector.startCollecting($interval)
-    LOG.info("Start recording with $interval interval on: " + InetAddress.getLocalHost().getCanonicalHostName())
-} else{
-    LOG.info("Thread dump is already running on: " + InetAddress.getLocalHost().getCanonicalHostName())
+    log.info("Start recording with {} interval on: {}", $interval, host)
 }
-

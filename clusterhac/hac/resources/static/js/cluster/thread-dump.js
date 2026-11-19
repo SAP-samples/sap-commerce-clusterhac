@@ -1,10 +1,14 @@
-var threadDumpEnabled , threadDumpUpdateIntervalId ;
+var threadDumpEnabled, threadDumpUpdateIntervalId;
 var nodeGroupValues = [];
 var selectedNodeIds = [];
-var token;
-$(document).ready(function() {
-     token = $("meta[name='_csrf']").attr("content");
 
+var REFRESH_INTERVAL_MS = 10000;
+
+function csrfToken() {
+    return $("meta[name='_csrf']").attr("content");
+}
+
+$(document).ready(function() {
     refreshClusterThreadDumpInfo();
 
     // Pod sub-selection (shared PodPicker). When on, targeting is by node id, not group.
@@ -45,12 +49,18 @@ $(document).ready(function() {
                         + encodeURIComponent(data) + '">';
                 }
             },
-            {"data": "creationTime"},
-            {"data": "url"},
+            {
+                "data": "creationTime",
+                "render": function(data) { return escapeHtml(data); }
+            },
+            {
+                "data": "url",
+                "render": function(data) { return escapeHtml(data); }
+            },
             {
                 "data": "url",
                 "render": function(data) {
-                    return '<a href="' + data + '">Download</a>'
+                    return '<a href="' + safeUrl(data) + '">Download</a>'
                 }
             },
             {
@@ -92,37 +102,28 @@ $(document).ready(function() {
     });
 
     $('#nodeGroups').change(function() {
-        nodeGroupValues = [];
-        $('#nodeGroups :selected').each(function(i, selected) {
-            nodeGroupValues.push($(nodeGroups).val()[i]);
-        });
-        if(nodeGroupValues.length > 0  ){
-            if($("#start-button").is(':disabled')){
-                document.getElementById("start-button").disabled = false;
-            }
+        nodeGroupValues = $('#nodeGroups').val() || [];
+        if (nodeGroupValues.length > 0 && $('#start-button').is(':disabled')) {
+            $('#start-button').prop('disabled', false);
         }
     });
 
     $("#start-button").click(function(event) {
         threadDumpEnabled = !threadDumpEnabled;
 
-        // if(! $("#start-button").is(':disabled')){
-        //     document.getElementById("start-button").disabled = true;
-        // }
-        //
-        // if( $("#stop-button").is(':disabled')){
-        //     document.getElementById("stop-button").disabled = false;
-        // }
         updateThreadDumpUI();
-        if(threadDumpEnabled){
+        if (threadDumpEnabled) {
             startThreadDump();
-            threadDumpUpdateIntervalId = setInterval("refreshClusterThreadDumpInfo()", 10000);
+            // Avoid leaking a poller: getRefreshClusterThreadDumpInfo may already have started one
+            // on page load when a dump was in progress.
+            if (threadDumpUpdateIntervalId) { clearInterval(threadDumpUpdateIntervalId); }
+            threadDumpUpdateIntervalId = setInterval(refreshClusterThreadDumpInfo, REFRESH_INTERVAL_MS);
         } else {
             stopThreadDump();
-            if( $("#start-button").is(':disabled') && nodeGroupValues.length > 0){
-                document.getElementById("start-button").disabled = false;
-            } else if( !$("#start-button").is(':disabled') && nodeGroupValues.length == 0){
-                document.getElementById("start-button").disabled = true;
+            if ($("#start-button").is(':disabled') && nodeGroupValues.length > 0) {
+                $('#start-button').prop('disabled', false);
+            } else if (!$("#start-button").is(':disabled') && nodeGroupValues.length === 0) {
+                $('#start-button').prop('disabled', true);
             }
         }
     });
@@ -139,7 +140,7 @@ $(document).ready(function() {
             data: saveData,
             headers: {
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN': token
+                'X-CSRF-TOKEN': csrfToken()
             },
             success: function(data) {
                 // Re-enable Start once the save completed, if a target is still selected. Handle
@@ -147,7 +148,7 @@ $(document).ready(function() {
                 var hasTarget = $('#podMode').is(':checked')
                     ? (selectedNodeIds && selectedNodeIds.length > 0)
                     : (nodeGroupValues && nodeGroupValues.length > 0);
-                if (hasTarget) { document.getElementById("start-button").disabled = false; }
+                if (hasTarget) { $('#start-button').prop('disabled', false); }
                 setTimeout(function() {
                     dataTable.api().ajax.reload(function() {
                         dataTable.api().columns.adjust();
@@ -166,7 +167,7 @@ $(document).ready(function() {
             url: $('#clean-up-media-button').attr('data-url'),
             headers: {
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN': token
+                'X-CSRF-TOKEN': csrfToken()
             },
             success: function(data) {
                 setTimeout(function() {
@@ -199,7 +200,7 @@ function startThreadDump()
         data: data,
         headers: {
             'Accept': 'application/json',
-            'X-CSRF-TOKEN': token
+            'X-CSRF-TOKEN': csrfToken()
         },
         success: function(data) {
             setTimeout(function() {
@@ -213,14 +214,12 @@ function startThreadDump()
 
 function stopThreadDump()
 {
-    // $('#spinnerWrapper').show();
-
     $.ajax({
         type: "POST",
         url: $('#start-button').attr('data-stop-url'),
         headers: {
             'Accept': 'application/json',
-            'X-CSRF-TOKEN': token
+            'X-CSRF-TOKEN': csrfToken()
         },
         success: function(data) {
             setTimeout(function() {
@@ -231,10 +230,8 @@ function stopThreadDump()
     });
 }
 
-///
 function refreshClusterThreadDumpInfo()
 {
-    var token = $("meta[name='_csrf']").attr("content");
     var url = $('#accordion').attr('data-refreshThreadDumpInfoUrl');
     $.ajax({
         url : url,
@@ -242,75 +239,66 @@ function refreshClusterThreadDumpInfo()
         dataType: 'json',
         headers : {
             'Accept' : 'application/json',
-            'X-CSRF-TOKEN' : token
+            'X-CSRF-TOKEN' : csrfToken()
         },
         success : function(data) {
             // server returns JSON object: { uuid: "..." }
-            var scriptUid = data.uuid;
-            getRefreshClusterThreadDumpInfo(scriptUid)
-
+            getRefreshClusterThreadDumpInfo(data.uuid);
         },
         error: hac.global.err
     });
 }
-///
+
 function getRefreshClusterThreadDumpInfo(scriptUid)
 {
     threadDumpEnabled = false;
-    var token = $("meta[name='_csrf']").attr("content");
     var url = $('#accordion').attr('data-refreshThreadDumpInfoUrlResults');
     $.ajax({
-        url:url,
-        type:'GET',
+        url: url,
+        type: 'GET',
         dataType: 'json',
-        headers:{
-            'Accept':'application/json',
-            'X-CSRF-TOKEN' : token
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken()
         },
-        data:{
-            uuid: scriptUid,
+        data: {
+            uuid: scriptUid
         },
         success: function(data) {
-            debug.log(data);
-
             var threadDumpEnabledCount = 0;
 
-            for (pos in data) {
+            for (var pos in data) {
+                if (!data.hasOwnProperty(pos)) { continue; }
                 var cluster = data[pos];
-                // checking log enable
-                if(cluster.dumpProcessing){
-                    ++ threadDumpEnabledCount;
-                    if(nodeGroupValues.length < threadDumpEnabledCount){
+                if (cluster.dumpProcessing) {
+                    ++threadDumpEnabledCount;
+                    if (nodeGroupValues.length < threadDumpEnabledCount) {
                         nodeGroupValues.push(cluster.clusterGroup);
-                        //Get select object
                         var objSelect = document.getElementById("nodeGroups");
-                        //Set selected
-                        cluster.clusterGroup.forEach(item => setSelectedValue(objSelect, item));
+                        cluster.clusterGroup.forEach(function(item) { setSelectedValue(objSelect, item); });
                     }
                 }
             }
-            if(threadDumpEnabledCount > 0){
-                threadDumpEnabled = true
-                if($("#start-button").is(':disabled')){
-                    document.getElementById("start-button").disabled = false;
-                }
-            } else{
-                threadDumpEnabled = false
+
+            threadDumpEnabled = threadDumpEnabledCount > 0;
+            if (threadDumpEnabled && $("#start-button").is(':disabled')) {
+                $('#start-button').prop('disabled', false);
             }
             updateThreadDumpUI();
-            if (threadDumpEnabled && !threadDumpUpdateIntervalId){
-                threadDumpUpdateIntervalId = setInterval("refreshClusterThreadDumpInfo()", 10000);
-            } else if(! threadDumpEnabled && threadDumpUpdateIntervalId ){
+            if (threadDumpEnabled && !threadDumpUpdateIntervalId) {
+                threadDumpUpdateIntervalId = setInterval(refreshClusterThreadDumpInfo, REFRESH_INTERVAL_MS);
+            } else if (!threadDumpEnabled && threadDumpUpdateIntervalId) {
                 clearInterval(threadDumpUpdateIntervalId);
+                threadDumpUpdateIntervalId = null;
             }
         },
         error: hac.global.err
     });
 }
-//
+
 function setSelectedValue(selectObj, valueToSet) {
     for (var i = 0; i < selectObj.options.length; i++) {
-        if (selectObj.options[i].text== valueToSet) {
+        if (selectObj.options[i].text === valueToSet) {
             selectObj.options[i].selected = true;
             return;
         }
@@ -326,12 +314,11 @@ function updateThreadDumpUI()
 function analyzeThreadDumps(codes) {
     var out = $('#td-analysis');
     out.html('<p class="quiet">Analyzing…</p>');
-    var token = $("meta[name='_csrf']").attr("content");
     // jQuery serialises an array param as repeated code=... which Spring binds to List<String>.
     $.ajax({
         url: $('#result-table').attr('data-analyze-url'),
         type: 'GET', dataType: 'json', traditional: true,
-        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': token },
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
         data: { code: codes },
         success: function(a) { renderAnalysis(a); },
         error: function(xhr) { out.html('<p class="quiet">Analysis request failed.</p>'); hac.global.err(xhr); }
@@ -341,13 +328,13 @@ function analyzeThreadDumps(codes) {
 function renderAnalysis(a) {
     var out = $('#td-analysis');
     if (!a || a.error) {
-        out.html('<p class="quiet">' + (a && a.error ? a.error : 'No analysis.') + '</p>');
+        out.html('<p class="quiet">' + escapeHtml(a && a.error ? a.error : 'No analysis.') + '</p>');
         return;
     }
-    var scope = (a.dumpCount > 1) ? (a.dumpCount + ' dumps') : '1 dump';
+    var scope = (a.dumpCount > 1) ? (num(a.dumpCount) + ' dumps') : '1 dump';
     var html = '<h3>Thread-dump analysis</h3>'
-        + '<p class="quiet td-note">' + scope + ', ' + a.snapshotCount + ' snapshot(s) pooled, '
-        + a.threadCount + ' threads (latest snapshot).</p>';
+        + '<p class="quiet td-note">' + scope + ', ' + num(a.snapshotCount) + ' snapshot(s) pooled, '
+        + num(a.threadCount) + ' threads (latest snapshot).</p>';
 
     // 1. FINDINGS — the answers, up top. Colour signals severity; wording carries confidence
     //    (deadlock asserts as fact; everything else is softened as a possibility).
@@ -355,9 +342,9 @@ function renderAnalysis(a) {
     if (a.findings && a.findings.length) {
         for (var f = 0; f < a.findings.length; f++) {
             var fd = a.findings[f];
-            html += '<div class="td-finding td-' + (fd.severity || 'info') + '">'
-                + '<strong>' + fd.title + '</strong>'
-                + '<div class="td-finding-detail">' + fd.detail + '</div></div>';
+            html += '<div class="td-finding td-' + escapeHtml(fd.severity || 'info') + '">'
+                + '<strong>' + escapeHtml(fd.title) + '</strong>'
+                + '<div class="td-finding-detail">' + escapeHtml(fd.detail) + '</div></div>';
         }
     } else {
         html += '<p class="quiet td-note">No findings.</p>';
@@ -378,7 +365,7 @@ function renderAnalysis(a) {
             + '<table class="cache-worst"><thead><tr><th>Pool</th><th>Active</th><th>Total</th></tr></thead><tbody>';
         for (var p = 0; p < a.pools.length; p++) {
             var pl = a.pools[p];
-            html += '<tr><td>' + pl.pool + '</td><td>' + pl.active + '</td><td>' + pl.total + '</td></tr>';
+            html += '<tr><td>' + escapeHtml(pl.pool) + '</td><td>' + num(pl.active) + '</td><td>' + num(pl.total) + '</td></tr>';
         }
         html += '</tbody></table>';
     }
@@ -399,8 +386,8 @@ function renderAnalysis(a) {
         html += '<table class="cache-worst"><thead><tr><th>Threads</th><th>Component</th><th>Top frames</th></tr></thead><tbody>';
         for (var fc = 0; fc < a.topFrames.length; fc++) {
             var cl = a.topFrames[fc];
-            var stack = (cl.frames || []).join('<br><span class="quiet">&nbsp;&nbsp;&larr; </span>');
-            html += '<tr><td>' + cl.count + '</td><td><strong>' + cl.component + '</strong></td><td>' + stack + '</td></tr>';
+            var stack = (cl.frames || []).map(escapeHtml).join('<br><span class="quiet">&nbsp;&nbsp;&larr; </span>');
+            html += '<tr><td>' + num(cl.count) + '</td><td><strong>' + escapeHtml(cl.component) + '</strong></td><td>' + stack + '</td></tr>';
         }
         html += '</tbody></table>';
     } else {
@@ -411,7 +398,7 @@ function renderAnalysis(a) {
     var cpuNote;
     if (a.cpuMode === 'delta') {
         var win = (a.spanMinutes >= 0)
-            ? (a.spanMinutes >= 60 ? (' over a ~' + Math.round(a.spanMinutes / 60) + 'h window') : (' over a ~' + a.spanMinutes + 'min window'))
+            ? (a.spanMinutes >= 60 ? (' over a ~' + num(Math.round(a.spanMinutes / 60)) + 'h window') : (' over a ~' + num(a.spanMinutes) + 'min window'))
             : '';
         cpuNote = 'CPU consumed <em>during this recording</em> (delta, first&rarr;last snapshot)' + win + '.'
             + (a.spanMinutes > 15 ? ' Wide window — this is total CPU across the range, not a tight sample; a short recording gives a sharper "hot now" read.' : '');
@@ -430,8 +417,8 @@ function renderAnalysis(a) {
             + '<th>RUNNABLE</th><th>BLOCKED</th><th>WAITING</th><th>TIMED_WAITING</th></tr></thead><tbody>';
         for (var d = 0; d < a.trend.length; d++) {
             var tr = a.trend[d];
-            html += '<tr><td>' + tr.label + '</td><td>' + tr.total + '</td><td>' + tr.RUNNABLE
-                + '</td><td>' + tr.BLOCKED + '</td><td>' + tr.WAITING + '</td><td>' + tr.TIMED_WAITING + '</td></tr>';
+            html += '<tr><td>' + escapeHtml(tr.label) + '</td><td>' + num(tr.total) + '</td><td>' + num(tr.RUNNABLE)
+                + '</td><td>' + num(tr.BLOCKED) + '</td><td>' + num(tr.WAITING) + '</td><td>' + num(tr.TIMED_WAITING) + '</td></tr>';
         }
         html += '</tbody></table>';
     }
@@ -440,9 +427,9 @@ function renderAnalysis(a) {
         + '<th>RUNNABLE</th><th>BLOCKED</th><th>WAITING</th><th>TIMED_WAITING</th><th>Total</th></tr></thead><tbody>';
     for (var i = 0; i < a.stateHistogram.length; i++) {
         var c = a.stateHistogram[i].counts || {};
-        html += '<tr><td>#' + (i + 1) + '</td><td>' + (c.RUNNABLE || 0) + '</td><td>' + (c.BLOCKED || 0)
-            + '</td><td>' + (c.WAITING || 0) + '</td><td>' + (c.TIMED_WAITING || 0) + '</td><td>'
-            + a.stateHistogram[i].total + '</td></tr>';
+        html += '<tr><td>#' + (i + 1) + '</td><td>' + num(c.RUNNABLE || 0) + '</td><td>' + num(c.BLOCKED || 0)
+            + '</td><td>' + num(c.WAITING || 0) + '</td><td>' + num(c.TIMED_WAITING || 0) + '</td><td>'
+            + num(a.stateHistogram[i].total) + '</td></tr>';
     }
     html += '</tbody></table>';
 
@@ -450,7 +437,26 @@ function renderAnalysis(a) {
 }
 
 function escapeHtml(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    if (s === undefined || s === null) { return ''; }
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// Returns an escaped href only for http(s) URLs; anything else (javascript:, data:, …)
+// collapses to '#' so a crafted media URL cannot run script on click.
+function safeUrl(url) {
+    var s = String(url === undefined || url === null ? '' : url).trim();
+    return /^https?:\/\//i.test(s) ? escapeHtml(s) : '#';
+}
+
+// Escapes a field expected to be numeric. Counts come from the server as numbers, but
+// escaping guards against a malformed non-numeric value ever reaching innerHTML.
+function num(n) {
+    return escapeHtml(n === undefined || n === null ? 0 : n);
 }
 
 function analysisTable(title, rows, keys, headers, emptyMsg, note) {
@@ -464,7 +470,7 @@ function analysisTable(title, rows, keys, headers, emptyMsg, note) {
         html += '<tr>';
         for (var k = 0; k < keys.length; k++) {
             var v = rows[r][keys[k]];
-            html += '<td>' + (v === undefined || v === null ? '' : v) + '</td>';
+            html += '<td>' + (v === undefined || v === null ? '' : escapeHtml(v)) + '</td>';
         }
         html += '</tr>';
     }
