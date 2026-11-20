@@ -26,13 +26,16 @@ If you wish to contribute code, offer fixes, or make improvements, please send a
 ### Before you open a pull request
 
 - CI runs a secret scan, a REUSE licensing check and a check for environment host names on every
-  pull request. All three must pass, along with CodeQL.
-- The unit tests need an SAP Commerce installation, so CI cannot run them. Run
-  `ant unittests -Dtestclasses.extensions=clusterhac` locally and paste the result in the pull request.
+  pull request, next to CodeQL. Merge only when all of them pass.
+- The unit tests need an SAP Commerce installation, so CI cannot run them. Run both commands
+  locally and paste the results in the pull request. The second one runs the HAC module tests.
+  - `ant unittests -Dtestclasses.extensions=clusterhac`
+  - `ant unittests -Dtestclasses.extensions=clusterhac -Dtestclasses.web=true`
 - Never commit customer data, customer names, credentials or real CCv2 and Cloud Logging Service
   host names. Use placeholders such as `https://dashboards-<subscription>.<region>.cls.services.cloud.sap`.
 - Optional: `pip install pre-commit && pre-commit install` runs the same checks before each commit.
-- Each pull request needs one approval from a code owner (`.github/CODEOWNERS`) other than its author.
+- Each pull request needs one approval from someone other than the last person who pushed to it.
+  `.github/CODEOWNERS` names who reviews.
 
 ### Developer Certificate of Origin (DCO)
 
