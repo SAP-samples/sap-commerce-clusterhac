@@ -21,7 +21,21 @@ If you wish to contribute code, offer fixes, or make improvements, please send a
 1. Fork the repository and create your branch from `main`.
 2. Make your change, keeping it focused and well scoped.
 3. Ensure the extension builds and existing tests pass.
-4. Open a pull request describing the change and the motivation behind it.
+4. Open a pull request and fill in the template: what changed, why, and how you verified it.
+
+### Before you open a pull request
+
+- CI runs a secret scan, a REUSE licensing check and a check for environment host names on every
+  pull request, next to CodeQL. Merge only when all of them pass.
+- The unit tests need an SAP Commerce installation, so CI cannot run them. Run both commands
+  locally and paste the results in the pull request. The second one runs the HAC module tests.
+  - `ant unittests -Dtestclasses.extensions=clusterhac`
+  - `ant unittests -Dtestclasses.extensions=clusterhac -Dtestclasses.web=true`
+- Never commit customer data, customer names, credentials or real CCv2 and Cloud Logging Service
+  host names. Use placeholders such as `https://dashboards-<subscription>.<region>.cls.services.cloud.sap`.
+- Optional: `pip install pre-commit && pre-commit install` runs the same checks before each commit.
+- Each pull request needs one approval from someone other than the last person who pushed to it.
+  `.github/CODEOWNERS` names who reviews.
 
 ### Developer Certificate of Origin (DCO)
 
