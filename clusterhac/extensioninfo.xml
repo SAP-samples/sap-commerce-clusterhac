@@ -8,7 +8,6 @@
                       
 
 
-<!--        <requires-extension name="cmsfacades" />-->
         <!-- Heap Dump tab streams dumps to Azure Blob via com.azure.storage.blob.*, shipped by azurecloud. -->
         <requires-extension name="azurecloud"/>
         <coremodule generated="true" manager="clusterhac.jalo.YhacextManager" packageroot="clusterhac"/>

@@ -137,7 +137,7 @@ var nodestable;
 				? (node.nonHeapMb + ' MB') : 'n/a';
 
 			var logsCell = node.kibanaEndpoint
-				? '<a href="' + node.kibanaEndpoint + '" target="_blank">Kibana</a>'
+				? '<a href="' + node.kibanaEndpoint + '" target="_blank">View logs in CLS</a>'
 				: '<span class="quiet">n/a</span>';
 
 			nodestable.api().row.add([

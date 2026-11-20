@@ -1,8 +1,8 @@
-import de.hybris.platform.cmsfacades.data.MediaData
-import de.hybris.platform.cmsfacades.dto.MediaFileDto
-import de.hybris.platform.cmsfacades.exception.ValidationException
-import de.hybris.platform.cmsfacades.media.MediaFacade
+import de.hybris.platform.catalog.model.CatalogUnawareMediaModel
+import de.hybris.platform.core.model.media.MediaModel
 import de.hybris.platform.hac.facade.ThreadDumpCollector
+import de.hybris.platform.servicelayer.media.MediaService
+import de.hybris.platform.servicelayer.model.ModelService
 import org.apache.commons.io.FilenameUtils
 import org.slf4j.LoggerFactory
 
@@ -11,39 +11,47 @@ import java.nio.file.Path
 
 final def log = LoggerFactory.getLogger("save-media")
 
-// Bindings provided by the script executor
+// Bindings resolve to Spring beans by id. threadDumpCollector is an OOTB HAC bean; modelService
+// and mediaService are core servicelayer beans (always present) — no cmsfacades dependency.
 final ThreadDumpCollector collector = threadDumpCollector
-final MediaFacade facade = mediaFacade
+final ModelService ms = modelService
+final MediaService mediaSvc = mediaService
 
-final Path file = collector.result
 final String host = InetAddress.localHost.canonicalHostName
+
+// getResult() may return null, or throw DumpNotAvailableException when no dumps were captured
+// (e.g. save clicked before any snapshot, or before stop-recording finished). Guard so the node
+// does not fail silently with an NPE.
+final Path file
+try {
+    file = collector.result
+} catch (Exception e) {
+    log.warn("No thread-dump available to save on {}: {}", host, e.message)
+    return
+}
+if (file == null || !Files.exists(file)) {
+    log.warn("Thread-dump result file missing on {} (nothing recorded?)", host)
+    return
+}
+
 final String fileName = FilenameUtils.normalize("thread_dump_${host}_${file.fileName}")
 final long fileSize = Files.size(file)
 
 log.info("Copy {} ({} bytes) to media: {}", file, fileSize, fileName)
 
-final MediaData mediaData = new MediaData().with {
-    code = fileName
-    catalogId = "Default"
-    catalogVersion = "Staged"
-    description = "Thread dump"
-    altText = "Thread dump"
-    it
-}
-
-final MediaFileDto mediaFile = new MediaFileDto().with {
-    mime = "application/zip"
-    name = "${fileName}.zip"
-    it
-}
+// Create a plain (catalog-less) Media. The thread-dump DAO searches {Media} by
+// code LIKE 'thread_dump_%' with no catalog-version restriction, so no catalog version is set.
+// CatalogUnawareMedia redeclares catalogVersion as optional, so no catalog version is required.
+// It extends Media, so the thread-dump DAO's {Media} query (which includes subtypes) still finds it.
+final MediaModel media = ms.create(CatalogUnawareMediaModel)
+media.setCode(fileName)
+media.setDescription("Thread dump")
+media.setAltText("Thread dump")
+ms.save(media)
 
 file.toFile().withInputStream { inputStream ->
-    mediaFile.inputStream = inputStream
-    mediaFile.size = fileSize
-    try {
-        facade.addMedia(mediaData, mediaFile)
-        log.info("Saved packed to: {}", fileName)
-    } catch (ValidationException ve) {
-        log.error("Thread dump validation exceptions: {}", ve.message)
-    }
+    // Persists the binary and sets original file name + mime in one call.
+    mediaSvc.setStreamForMedia(media, inputStream, "${fileName}.zip", "application/zip")
 }
+
+log.info("Saved thread dump to media: {}", fileName)
