@@ -16,10 +16,13 @@ patterns=(
 args=()
 for p in "${patterns[@]}"; do args+=(-e "$p"); done
 
+# Only file and line are printed: CI logs are public, so the host itself must not appear there.
 rc=0
-git grep -nIiE "${args[@]}" -- . ':!.github/scripts/check-hostnames.sh' ':!.gitleaks.toml' || rc=$?
+hits=$(git grep -nIiE "${args[@]}" -- . ':!.github/scripts/check-hostnames.sh' ':!.gitleaks.toml') || rc=$?
 case $rc in
-  0) echo "Environment host names found above. Replace them with a placeholder." >&2; exit 1 ;;
+  0) cut -d: -f1,2 <<< "$hits" >&2
+     echo "Environment host names found at the lines above. Replace them with a placeholder." >&2
+     exit 1 ;;
   1) echo "No environment host names found." ;;
   *) echo "git grep failed (exit $rc)." >&2; exit 2 ;;
 esac
